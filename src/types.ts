@@ -46,7 +46,14 @@ export interface GameItem {
   speedBonus?: number;
 }
 
-export type QuizType = 'word_order' | 'blank_fill' | 'reference_match';
+export type QuizType =
+  | 'full_typing'
+  | 'word_order'
+  | 'phrase_order'
+  | 'blank_fill_3'
+  | 'blank_fill_2'
+  | 'blank_fill_1'
+  | 'reference_match';
 
 export interface QuizQuestion {
   id: string;
