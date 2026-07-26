@@ -46,7 +46,7 @@ export interface GameItem {
   speedBonus?: number;
 }
 
-export type QuizType = 'word_order' | 'blank_fill' | 'ox_quiz' | 'reference_match' | 'recite_check';
+export type QuizType = 'word_order' | 'blank_fill' | 'reference_match';
 
 export interface QuizQuestion {
   id: string;
@@ -60,9 +60,6 @@ export interface QuizQuestion {
   blanksText?: string; // Text with ___
   blankOptions?: string[];
   correctBlankAnswers?: string[];
-  // For ox_quiz:
-  oxStatement?: string;
-  isOxCorrect?: boolean;
   // For multi choice / reference match:
   options?: string[];
   correctAnswer?: string;

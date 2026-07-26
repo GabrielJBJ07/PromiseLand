@@ -4,9 +4,6 @@ import { BIBLE_VERSES } from '../data/bibleVerses';
 import confetti from 'canvas-confetti';
 import {
   X,
-  CheckCircle2,
-  XCircle,
-  Sparkles,
   RefreshCw,
   Award,
 } from 'lucide-react';
@@ -23,7 +20,6 @@ const QUIZ_TYPES: { id: QuizType; label: string; icon: string; desc: string }[] 
   { id: 'word_order', label: '단어 순서 맞추기', icon: '🧩', desc: '흩어진 말씀 조각을 기억하여 바른 순서로 배열하세요.' },
   { id: 'blank_fill', label: '빈칸 맞추기', icon: '✏️', desc: '말씀 속 핵심 빈칸에 들어갈 올바른 단어를 고르세요.' },
   { id: 'reference_match', label: '성경 구절 주소 맞추기', icon: '📖', desc: '제시된 말씀을 읽고 올바른 성경 장/절 주소를 맞추세요.' },
-  { id: 'ox_quiz', label: 'ZEP OX 참거짓 퀴즈', icon: '⭕❌', desc: '제시된 말씀 설명의 참/거짓을 판별하세요.' },
 ];
 
 export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
@@ -48,10 +44,6 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
   const [refMatchOptions, setRefMatchOptions] = useState<string[]>([]);
   const [selectedRefChoice, setSelectedRefChoice] = useState<string>('');
 
-  // OX Quiz State
-  const [oxStatement, setOxStatement] = useState<{ text: string; isCorrect: boolean }>({ text: '', isCorrect: true });
-  const [oxUserChoice, setOxUserChoice] = useState<boolean | null>(null);
-
   // Status & Feedback
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState<string>('');
@@ -75,7 +67,7 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
     setFeedbackMsg('');
     setShieldUsed(false);
 
-    // Pick 1 random quiz type out of the 4, or use override
+    // Pick 1 random quiz type out of the 3, or use override
     const targetType = quizTypeOverride || QUIZ_TYPES[Math.floor(Math.random() * QUIZ_TYPES.length)].id;
     const quizConfig = QUIZ_TYPES.find((q) => q.id === targetType) || QUIZ_TYPES[0];
     setSelectedQuiz(quizConfig);
@@ -132,22 +124,6 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
     const refChoices = [verse.reference, ...distractorRefs].sort(() => Math.random() - 0.5);
     setRefMatchOptions(refChoices);
     setSelectedRefChoice('');
-
-    // 4. Prepare OX Statement
-    const isTrueStatement = Math.random() > 0.5;
-    if (isTrueStatement) {
-      setOxStatement({
-        text: `이 말씀 [${verse.reference}]의 주요 주제는 '${verse.theme}'입니다.`,
-        isCorrect: true,
-      });
-    } else {
-      const wrongThemeVerse = shuffledOthers[0];
-      setOxStatement({
-        text: `이 말씀 [${verse.reference}]의 주요 주제는 '${wrongThemeVerse?.theme || '절망'}'입니다.`,
-        isCorrect: false,
-      });
-    }
-    setOxUserChoice(null);
   };
 
   // Initialize Quiz on Open or Verse change
@@ -198,15 +174,6 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
       triggerSuccess(pointsReward);
     } else {
       triggerFailure(`아쉬워요! [${refChoice}] 구절이 아닙니다.`);
-    }
-  };
-
-  const handleVerifyOx = (userChoice: boolean) => {
-    setOxUserChoice(userChoice);
-    if (userChoice === oxStatement.isCorrect) {
-      triggerSuccess(pointsReward);
-    } else {
-      triggerFailure('아쉬워요! 정답이 아닙니다. 설명 내용을 다시 확인해보세요.');
     }
   };
 
@@ -392,44 +359,6 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
                     📖 {refOpt}
                   </button>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* TYPE 4: ZEP OX QUIZ */}
-          {selectedQuiz.id === 'ox_quiz' && (
-            <div className="space-y-4 text-center">
-              <p className="text-xs text-slate-300 font-bold">
-                ZEP OX 구역 퀴즈! 아래 말씀 설명이 맞으면 O, 틀리면 X를 선택하세요:
-              </p>
-              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-sm font-bold text-amber-200 leading-relaxed">
-                {oxStatement.text}
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <button
-                  onClick={() => handleVerifyOx(true)}
-                  className={`p-4 rounded-2xl font-black text-base transition cursor-pointer flex items-center justify-center gap-2 border ${
-                    oxUserChoice === true
-                      ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg'
-                      : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/20'
-                  }`}
-                >
-                  <span className="text-xl">⭕</span>
-                  <span>O (맞다)</span>
-                </button>
-
-                <button
-                  onClick={() => handleVerifyOx(false)}
-                  className={`p-4 rounded-2xl font-black text-base transition cursor-pointer flex items-center justify-center gap-2 border ${
-                    oxUserChoice === false
-                      ? 'bg-rose-500 text-slate-950 border-rose-400 shadow-lg'
-                      : 'bg-rose-950/40 text-rose-300 border-rose-500/40 hover:bg-rose-500/20'
-                  }`}
-                >
-                  <span className="text-xl">❌</span>
-                  <span>X (틀리다)</span>
-                </button>
               </div>
             </div>
           )}
