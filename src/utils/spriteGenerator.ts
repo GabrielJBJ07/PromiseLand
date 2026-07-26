@@ -1,10 +1,11 @@
 import { CharacterPreset } from '../types';
 
 export const CHARACTER_PRESETS: CharacterPreset[] = [
+  // 남성 성경 인물 (4명)
   {
     id: 'joshua',
     name: '여호수아',
-    title: '약속의 땅 정복 대장',
+    title: '정복 대장 (남)',
     hairColor: '#4A2E1A',
     skinColor: '#F2D3B4',
     outfitColor: '#2B5797',
@@ -14,7 +15,7 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
   {
     id: 'moses',
     name: '모세',
-    title: '믿음의 인도자',
+    title: '믿음의 인도자 (남)',
     hairColor: '#E0E0E0',
     skinColor: '#E2B897',
     outfitColor: '#9C27B0',
@@ -24,7 +25,7 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
   {
     id: 'david',
     name: '다윗',
-    title: '찬양하는 은혜의 왕',
+    title: '찬양의 찬란한 왕 (남)',
     hairColor: '#D97706',
     skinColor: '#F5D0A9',
     outfitColor: '#059669',
@@ -32,9 +33,21 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
     accessory: 'harp',
   },
   {
+    id: 'paul',
+    name: '바울',
+    title: '복음의 전도자 (남)',
+    hairColor: '#78350F',
+    skinColor: '#F3D5B5',
+    outfitColor: '#2563EB',
+    hatType: 'tunic',
+    accessory: 'scroll',
+  },
+
+  // 여성 성경 인물 (4명)
+  {
     id: 'esther',
     name: '에스더',
-    title: '결단의 왕후',
+    title: '결단의 왕후 (여)',
     hairColor: '#1E1B18',
     skinColor: '#FCE7F3',
     outfitColor: '#DB2777',
@@ -42,19 +55,9 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
     accessory: 'scroll',
   },
   {
-    id: 'paul',
-    name: '바울',
-    title: '복음의 전도자',
-    hairColor: '#78350F',
-    skinColor: '#F3D5B5',
-    outfitColor: '#2563EB',
-    hatType: 'tunic',
-    accessory: 'scroll',
-  },
-  {
     id: 'mary',
     name: '마리아',
-    title: '순종의 여종',
+    title: '순종의 여종 (여)',
     hairColor: '#312E81',
     skinColor: '#FFF1F2',
     outfitColor: '#0284C7',
@@ -62,24 +65,24 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
     accessory: 'branch',
   },
   {
-    id: 'peter',
-    name: '베드로',
-    title: '사람을 낚는 어부',
-    hairColor: '#475569',
-    skinColor: '#EAB308',
-    outfitColor: '#0D9488',
-    hatType: 'tunic',
-    accessory: 'shield',
-  },
-  {
-    id: 'pirate_captain',
-    name: '모험가 신앙이',
-    title: '보물 탐험대장',
+    id: 'deborah',
+    name: '드보라',
+    title: '용기의 여선지자 (여)',
     hairColor: '#DC2626',
     skinColor: '#FDE047',
     outfitColor: '#7C3AED',
-    hatType: 'pirate_hat',
+    hatType: 'ribbon',
     accessory: 'shield',
+  },
+  {
+    id: 'ruth',
+    name: '룻',
+    title: '신실한 순종의 여인 (여)',
+    hairColor: '#7C2D12',
+    skinColor: '#FCE7F3',
+    outfitColor: '#0D9488',
+    hatType: 'ribbon',
+    accessory: 'branch',
   },
 ];
 

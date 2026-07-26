@@ -127,154 +127,143 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
       </div>
 
       {/* Main Stepper Card */}
-      <div className="relative z-10 w-full max-w-3xl bg-slate-800/95 border border-amber-500/40 rounded-3xl p-4 sm:p-6 shadow-2xl backdrop-blur-md my-1 sm:my-2">
+      <div className="relative z-10 w-full max-w-2xl bg-slate-800/95 border border-amber-500/40 rounded-3xl p-3 sm:p-5 shadow-2xl backdrop-blur-md my-1">
         {/* Title Header */}
-        <div className="text-center mb-4 sm:mb-6">
-          <div className="inline-flex items-center gap-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-full text-xs font-bold mb-1.5">
+        <div className="text-center mb-2 sm:mb-3">
+          <div className="inline-flex items-center gap-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-bold mb-1">
             <Shield className="w-3.5 h-3.5" /> 초등부 말씀 암송 메타버스
           </div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-amber-400 tracking-tight">
+          <h1 className="text-lg sm:text-2xl font-extrabold text-amber-400 tracking-tight">
             ‘약속의 땅’ 캐릭터 만들기
           </h1>
+          <div className="text-[10px] sm:text-[11px] text-amber-200/80 font-bold mt-0.5">
+            개발자: Gabriel Byeongje Jeon
+          </div>
         </div>
 
         {/* STEPPER PROGRESS INDICATOR BAR */}
-        <div className="flex items-center justify-between max-w-md mx-auto mb-6 px-2">
+        <div className="flex items-center justify-between max-w-sm mx-auto mb-3 sm:mb-4 px-1">
           {/* Step 1 Indicator */}
           <button
             type="button"
             onClick={() => setCurrentStep(1)}
-            className={`flex flex-col items-center gap-1 flex-1 cursor-pointer transition ${
+            className={`flex flex-col items-center gap-0.5 flex-1 cursor-pointer transition ${
               currentStep === 1 ? 'text-amber-400 font-extrabold' : 'text-slate-500'
             }`}
           >
             <div
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm border-2 transition ${
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-black text-xs sm:text-sm border-2 transition ${
                 currentStep === 1
-                  ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-lg shadow-amber-500/30 scale-105'
+                  ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-md shadow-amber-500/30 scale-105'
                   : currentStep > 1
                   ? 'bg-emerald-500 text-slate-950 border-emerald-400'
                   : 'bg-slate-900 text-slate-500 border-slate-700'
               }`}
             >
-              {currentStep > 1 ? <Check className="w-5 h-5 stroke-[3]" /> : <User className="w-4 h-4" />}
+              {currentStep > 1 ? <Check className="w-4 h-4 stroke-[3]" /> : <User className="w-3.5 h-3.5" />}
             </div>
-            <span className="text-[11px] sm:text-xs">1단계: 이름/학년</span>
+            <span className="text-[10px] sm:text-xs">1단계: 이름/학년</span>
           </button>
 
-          <div className={`h-1 flex-1 rounded mx-1 transition ${currentStep >= 2 ? 'bg-emerald-500' : 'bg-slate-700'}`} />
+          <div className={`h-0.5 flex-1 rounded mx-1 transition ${currentStep >= 2 ? 'bg-emerald-500' : 'bg-slate-700'}`} />
 
           {/* Step 2 Indicator */}
           <button
             type="button"
             onClick={() => setCurrentStep(2)}
-            className={`flex flex-col items-center gap-1 flex-1 cursor-pointer transition ${
+            className={`flex flex-col items-center gap-0.5 flex-1 cursor-pointer transition ${
               currentStep === 2 ? 'text-amber-400 font-extrabold' : 'text-slate-500'
             }`}
           >
             <div
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm border-2 transition ${
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-black text-xs sm:text-sm border-2 transition ${
                 currentStep === 2
-                  ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-lg shadow-amber-500/30 scale-105'
+                  ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-md shadow-amber-500/30 scale-105'
                   : currentStep > 2
                   ? 'bg-emerald-500 text-slate-950 border-emerald-400'
                   : 'bg-slate-900 text-slate-500 border-slate-700'
               }`}
             >
-              {currentStep > 2 ? <Check className="w-5 h-5 stroke-[3]" /> : <Award className="w-4 h-4" />}
+              {currentStep > 2 ? <Check className="w-4 h-4 stroke-[3]" /> : <Award className="w-3.5 h-3.5" />}
             </div>
-            <span className="text-[11px] sm:text-xs">2단계: 인물 선택</span>
+            <span className="text-[10px] sm:text-xs">2단계: 인물 선택</span>
           </button>
 
-          <div className={`h-1 flex-1 rounded mx-1 transition ${currentStep >= 3 ? 'bg-emerald-500' : 'bg-slate-700'}`} />
+          <div className={`h-0.5 flex-1 rounded mx-1 transition ${currentStep >= 3 ? 'bg-emerald-500' : 'bg-slate-700'}`} />
 
           {/* Step 3 Indicator */}
           <button
             type="button"
             onClick={() => setCurrentStep(3)}
-            className={`flex flex-col items-center gap-1 flex-1 cursor-pointer transition ${
+            className={`flex flex-col items-center gap-0.5 flex-1 cursor-pointer transition ${
               currentStep === 3 ? 'text-amber-400 font-extrabold' : 'text-slate-500'
             }`}
           >
             <div
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-sm border-2 transition ${
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-black text-xs sm:text-sm border-2 transition ${
                 currentStep === 3
-                  ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-lg shadow-amber-500/30 scale-105'
+                  ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-md shadow-amber-500/30 scale-105'
                   : 'bg-slate-900 text-slate-500 border-slate-700'
               }`}
             >
-              <Palette className="w-4 h-4" />
+              <Palette className="w-3.5 h-3.5" />
             </div>
-            <span className="text-[11px] sm:text-xs">3단계: 커스텀</span>
+            <span className="text-[10px] sm:text-xs">3단계: 커스텀</span>
           </button>
         </div>
 
         {/* STEP CONTENT CONTAINER */}
-        <div className="bg-slate-900/80 rounded-2xl p-4 sm:p-6 border border-slate-700/80 mb-6 min-h-[300px] flex flex-col justify-center">
+        <div className="bg-slate-900/80 rounded-2xl p-3 sm:p-4 border border-slate-700/80 mb-3 min-h-[240px] sm:min-h-[280px] flex flex-col justify-center">
           
           {/* STEP 1: PLAYER NAME & GRADE */}
           {currentStep === 1 && (
-            <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
               {/* Preview Avatar Card */}
-              <div className="shrink-0 flex flex-col items-center bg-slate-950/80 rounded-2xl border-2 border-amber-500/40 p-4 w-36 h-36 sm:w-40 sm:h-40 justify-center shadow-inner">
+              <div className="shrink-0 flex flex-col items-center bg-slate-950/80 rounded-2xl border-2 border-amber-500/40 p-3 w-28 h-28 sm:w-36 sm:h-36 justify-center shadow-inner">
                 <SpriteCanvas
                   preset={currentCharacterConfig}
-                  size={80}
+                  size={64}
                   animated={true}
                   direction="down"
                 />
-                <span className="mt-2 text-[11px] text-amber-300 font-bold bg-slate-900/80 px-2 py-0.5 rounded-full">
+                <span className="mt-1 text-[10px] sm:text-[11px] text-amber-300 font-bold bg-slate-900/80 px-2 py-0.5 rounded-full">
                   {currentCharacterConfig.title}
                 </span>
               </div>
 
               {/* Form Inputs */}
-              <div className="flex-1 w-full space-y-4">
+              <div className="flex-1 w-full space-y-3">
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-sm font-bold text-slate-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs sm:text-sm font-bold text-slate-200">
                       학생 이름 입력
                     </label>
                     <span className="text-[10px] text-amber-400 font-bold bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30">
-                      비밀번호/로그인 없음
+                      로그인 필요없음
                     </span>
                   </div>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="예: 김믿음 (5학년 1반)"
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 text-base font-bold shadow-inner"
+                    placeholder="이름 입력 (예: 김믿음)"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 text-sm font-bold shadow-inner"
                     autoFocus
                   />
-                  {/* Quick Name Buttons */}
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
-                    <span className="text-[11px] text-slate-400 font-medium">빠른선택:</span>
-                    {['김믿음', '이신앙', '박소망', '최사랑', '한은혜'].map((quickName) => (
-                      <button
-                        key={quickName}
-                        type="button"
-                        onClick={() => setName(quickName)}
-                        className="text-xs bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 px-2.5 py-1 rounded-xl transition cursor-pointer active:scale-95 font-semibold"
-                      >
-                        {quickName}
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Grade Selection */}
                 <div>
-                  <label className="block text-sm font-bold text-slate-200 mb-1.5">학년 선택</label>
+                  <label className="block text-xs sm:text-sm font-bold text-slate-200 mb-1">학년 선택</label>
                   <div className="grid grid-cols-3 gap-2">
                     {(['4학년', '5학년', '6학년'] as Grade[]).map((g) => (
                       <button
                         key={g}
                         type="button"
                         onClick={() => setGrade(g)}
-                        className={`py-3 rounded-xl text-sm font-extrabold transition border cursor-pointer active:scale-95 min-h-[46px] ${
+                        className={`py-2 rounded-xl text-xs sm:text-sm font-extrabold transition border cursor-pointer active:scale-95 min-h-[42px] ${
                           grade === g
-                            ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-lg shadow-amber-500/20'
+                            ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-md shadow-amber-500/20'
                             : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800'
                         }`}
                       >
@@ -287,36 +276,40 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
             </div>
           )}
 
-          {/* STEP 2: BIBLE CHARACTER PRESET SELECTION */}
+          {/* STEP 2: BIBLE CHARACTER PRESET SELECTION (4 Male, 4 Female) */}
           {currentStep === 2 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm sm:text-base font-extrabold text-amber-300 flex items-center gap-1.5">
-                  <Award className="w-5 h-5 text-amber-400" /> 성경 인물 대표 프리셋을 선택하세요
+            <div className="space-y-2">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-xs sm:text-sm font-extrabold text-amber-300 flex items-center gap-1">
+                  <Award className="w-4 h-4 text-amber-400" /> 성경 인물 캐릭터를 선택하세요
                 </h3>
-                <span className="text-xs text-slate-400">({CHARACTER_PRESETS.length}가지 종류)</span>
+                <span className="text-[10px] text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                  남성 4명 / 여성 4명
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-                {CHARACTER_PRESETS.map((p) => {
+              {/* 4x2 Compact Grid for All 8 Characters */}
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                {CHARACTER_PRESETS.map((p, idx) => {
                   const isSelected = selectedPreset.id === p.id;
+                  const isMale = idx < 4;
                   return (
                     <button
                       key={p.id}
                       type="button"
                       onClick={() => handleSelectPreset(p)}
-                      className={`p-3 rounded-2xl border-2 flex flex-col items-center gap-2 transition cursor-pointer active:scale-95 text-center min-h-[110px] justify-between ${
+                      className={`p-1.5 sm:p-2 rounded-xl border flex flex-col items-center gap-0.5 transition cursor-pointer active:scale-95 text-center min-h-[80px] sm:min-h-[92px] justify-between ${
                         isSelected
-                          ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-xl shadow-amber-500/20 ring-2 ring-amber-400/50'
-                          : 'bg-slate-950/70 border-slate-800 text-slate-300 hover:border-slate-700'
+                          ? 'bg-amber-500/25 border-amber-400 text-amber-300 shadow-lg ring-1 ring-amber-400/60'
+                          : 'bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-700'
                       }`}
                     >
-                      <SpriteCanvas preset={p} size={48} animated={isSelected} />
-                      <div>
-                        <div className="text-xs font-extrabold text-amber-200">{p.name}</div>
-                        <div className="text-[10px] text-slate-400 font-medium truncate max-w-[110px]">
-                          {p.title}
-                        </div>
+                      <SpriteCanvas preset={p} size={36} animated={isSelected} />
+                      <div className="w-full">
+                        <div className="text-[11px] font-extrabold text-amber-200 truncate">{p.name}</div>
+                        <span className={`text-[9px] font-bold px-1 rounded ${isMale ? 'bg-blue-500/30 text-blue-300' : 'bg-pink-500/30 text-pink-300'}`}>
+                          {isMale ? '남성' : '여성'}
+                        </span>
                       </div>
                     </button>
                   );
@@ -327,33 +320,33 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
 
           {/* STEP 3: CUSTOM OUTFIT & ACCESSORIES */}
           {currentStep === 3 && (
-            <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
               {/* Preview Avatar Card */}
-              <div className="shrink-0 flex flex-col items-center bg-slate-950/80 rounded-2xl border-2 border-amber-500/40 p-4 w-40 h-40 justify-center shadow-inner">
+              <div className="shrink-0 flex flex-col items-center bg-slate-950/80 rounded-2xl border border-amber-500/40 p-2.5 w-28 h-28 sm:w-32 sm:h-32 justify-center shadow-inner">
                 <SpriteCanvas
                   preset={currentCharacterConfig}
-                  size={88}
+                  size={60}
                   animated={true}
                   direction="down"
                 />
-                <span className="mt-2 text-xs text-amber-300 font-extrabold bg-slate-900/90 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                <span className="mt-1 text-[10px] text-amber-300 font-extrabold bg-slate-900/90 px-2 py-0.5 rounded-full border border-amber-500/30 truncate max-w-[100px]">
                   {name || '믿음의 용사'} ({grade})
                 </span>
               </div>
 
               {/* Color & Outfit Customizer Options */}
-              <div className="flex-1 w-full space-y-3 sm:space-y-4">
+              <div className="flex-1 w-full space-y-2 text-left">
                 {/* Hair Color */}
                 <div>
-                  <span className="text-xs text-slate-300 font-bold mb-1.5 block">머리 색상 선택</span>
-                  <div className="flex flex-wrap gap-2">
+                  <span className="text-[11px] text-slate-300 font-bold mb-1 block">머리 색상</span>
+                  <div className="flex flex-wrap gap-1.5">
                     {HAIR_COLORS.map((c) => (
                       <button
                         key={c}
                         type="button"
                         onClick={() => setHairColor(c)}
-                        className={`w-8 h-8 rounded-full border-2 transition cursor-pointer active:scale-95 ${
-                          hairColor === c ? 'scale-110 border-amber-400 shadow-lg shadow-amber-500/40 ring-2 ring-amber-300' : 'border-slate-800'
+                        className={`w-6 h-6 rounded-full border-2 transition cursor-pointer active:scale-95 ${
+                          hairColor === c ? 'scale-110 border-amber-400 ring-2 ring-amber-300' : 'border-slate-800'
                         }`}
                         style={{ backgroundColor: c }}
                       />
@@ -363,15 +356,15 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
 
                 {/* Outfit Color */}
                 <div>
-                  <span className="text-xs text-slate-300 font-bold mb-1.5 block">의상 색상 선택</span>
-                  <div className="flex flex-wrap gap-2">
+                  <span className="text-[11px] text-slate-300 font-bold mb-1 block">의상 색상</span>
+                  <div className="flex flex-wrap gap-1.5">
                     {OUTFIT_COLORS.map((c) => (
                       <button
                         key={c}
                         type="button"
                         onClick={() => setOutfitColor(c)}
-                        className={`w-8 h-8 rounded-full border-2 transition cursor-pointer active:scale-95 ${
-                          outfitColor === c ? 'scale-110 border-amber-400 shadow-lg shadow-amber-500/40 ring-2 ring-amber-300' : 'border-slate-800'
+                        className={`w-6 h-6 rounded-full border-2 transition cursor-pointer active:scale-95 ${
+                          outfitColor === c ? 'scale-110 border-amber-400 ring-2 ring-amber-300' : 'border-slate-800'
                         }`}
                         style={{ backgroundColor: c }}
                       />
@@ -381,23 +374,22 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
 
                 {/* Hat Selection */}
                 <div>
-                  <span className="text-xs text-slate-300 font-bold mb-1.5 block">모자 / 면류관 선택</span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <span className="text-[11px] text-slate-300 font-bold mb-1 block">모자/머리장식</span>
+                  <div className="flex flex-wrap gap-1">
                     {[
                       { id: 'none', label: '없음' },
                       { id: 'crown', label: '👑 면류관' },
                       { id: 'helmet', label: '🪖 투구' },
                       { id: 'turban', label: '👳 터번' },
-                      { id: 'pirate_hat', label: '🎩 모험 모자' },
                       { id: 'ribbon', label: '🎀 리본' },
                     ].map((hat) => (
                       <button
                         key={hat.id}
                         type="button"
                         onClick={() => setHatType(hat.id as any)}
-                        className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer active:scale-95 min-h-[38px] ${
+                        className={`px-2 py-1 rounded-lg text-[10px] font-semibold border transition cursor-pointer active:scale-95 ${
                           hatType === hat.id
-                            ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold shadow'
+                            ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold'
                             : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800'
                         }`}
                       >
@@ -409,8 +401,8 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
 
                 {/* Accessory Selection */}
                 <div>
-                  <span className="text-xs text-slate-300 font-bold mb-1.5 block">무기 / 장비 아이템</span>
-                  <div className="flex flex-wrap gap-1.5">
+                  <span className="text-[11px] text-slate-300 font-bold mb-1 block">무기/장비</span>
+                  <div className="flex flex-wrap gap-1">
                     {[
                       { id: 'none', label: '맨손' },
                       { id: 'staff', label: '🪄 지팡이' },
@@ -423,9 +415,9 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
                         key={acc.id}
                         type="button"
                         onClick={() => setAccessory(acc.id as any)}
-                        className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer active:scale-95 min-h-[38px] ${
+                        className={`px-2 py-1 rounded-lg text-[10px] font-semibold border transition cursor-pointer active:scale-95 ${
                           accessory === acc.id
-                            ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold shadow'
+                            ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold'
                             : 'bg-slate-950 text-slate-300 border-slate-800 hover:bg-slate-800'
                         }`}
                       >
@@ -440,14 +432,14 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
         </div>
 
         {/* BOTTOM NAVIGATION ACTION BUTTONS */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-2">
           {currentStep > 1 ? (
             <button
               type="button"
               onClick={handlePrevStep}
-              className="bg-slate-900 hover:bg-slate-700 text-slate-300 font-bold py-3.5 px-5 rounded-2xl border border-slate-700 flex items-center gap-1.5 transition cursor-pointer active:scale-95 text-xs sm:text-sm min-h-[48px]"
+              className="bg-slate-900 hover:bg-slate-700 text-slate-300 font-bold py-2.5 px-4 rounded-xl border border-slate-700 flex items-center gap-1 transition cursor-pointer active:scale-95 text-xs sm:text-sm min-h-[44px]"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
               <span>이전 단계</span>
             </button>
           ) : (
@@ -458,16 +450,16 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
             <button
               type="button"
               onClick={handleNextStep}
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl flex items-center gap-2 transition cursor-pointer active:scale-95 text-xs sm:text-sm min-h-[48px]"
+              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 px-5 rounded-xl shadow-lg flex items-center gap-1.5 transition cursor-pointer active:scale-95 text-xs sm:text-sm min-h-[44px]"
             >
               <span>다음 단계로 이동</span>
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
             <button
               type="button"
               onClick={() => handleStart()}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 text-slate-950 font-black py-3.5 px-6 rounded-2xl shadow-xl shadow-emerald-500/20 border-2 border-emerald-300 flex items-center gap-2 transition cursor-pointer active:scale-95 text-sm sm:text-base animate-pulse min-h-[48px]"
+              className="bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 text-slate-950 font-black py-2.5 px-5 rounded-xl shadow-lg shadow-emerald-500/20 border-2 border-emerald-300 flex items-center gap-1.5 transition cursor-pointer active:scale-95 text-xs sm:text-sm animate-pulse min-h-[44px]"
             >
               <span>‘약속의 땅’ 탐험 시작! 🚀</span>
             </button>

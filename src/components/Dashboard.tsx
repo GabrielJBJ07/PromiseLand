@@ -67,7 +67,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 암송 현황 & 실시간 대시보드
               </h2>
               <p className="text-[10px] sm:text-xs text-slate-400 hidden sm:block">
-                스마트폰 QR 접속으로 참가한 학생들의 36구절 암송 진도 현황입니다. (현재 {joinedStudents.length}명 참여 중)
+                스마트폰 QR 접속으로 참가한 학생들의 36구절 암송 진도 현황입니다. (현재 {joinedStudents.length}명 참여 중) | <span className="text-amber-300/80 font-medium">개발자: Gabriel Byeongje Jeon</span>
               </p>
             </div>
           </div>

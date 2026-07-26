@@ -51,6 +51,7 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState<string>('');
   const [shieldUsed, setShieldUsed] = useState(false);
+  const [rerollCount, setRerollCount] = useState<number>(0);
 
   // Determine difficulty tier based on verse ID / station number (1 ~ 36)
   const stationNum = verse ? verse.id : 1;
@@ -62,6 +63,11 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
       : difficultyTier === 2
       ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
       : 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+
+  // Base Points & Reroll Penalty Calculation
+  const basePoints = difficultyTier === 1 ? 50 : difficultyTier === 2 ? 80 : 120;
+  const penaltyPerReroll = difficultyTier === 1 ? 15 : difficultyTier === 2 ? 20 : 30;
+  const pointsReward = Math.max(20, basePoints - rerollCount * penaltyPerReroll);
 
   // Function to initialize & scramble quiz based on verse & difficulty
   const initializeRandomQuiz = (quizTypeOverride?: QuizType) => {
@@ -131,14 +137,18 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
 
   useEffect(() => {
     if (isOpen && verse) {
+      setRerollCount(0);
       initializeRandomQuiz();
     }
   }, [isOpen, verse]);
 
   if (!isOpen || !verse) return null;
 
-  // Point Calculation based on Difficulty
-  const pointsReward = difficultyTier === 1 ? 50 : difficultyTier === 2 ? 80 : 120;
+  // Reroll handler with score penalty increment
+  const handleRerollQuiz = () => {
+    setRerollCount((prev) => prev + 1);
+    initializeRandomQuiz();
+  };
 
   // Handle selecting scrambled word block
   const handleSelectWordBlock = (word: string, index: number) => {
@@ -223,11 +233,15 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
               <Award className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-md border ${difficultyColor}`}>
                   {difficultyLabel}
                 </span>
                 <span className="text-[11px] sm:text-xs text-amber-400 font-bold">미션 #{stationNum}</span>
+                <span className="text-[10px] sm:text-[11px] font-black bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/40">
+                  🏆 {pointsReward}점 획득 가능
+                  {rerollCount > 0 && <span className="text-rose-300 ml-1">(-{rerollCount * penaltyPerReroll}점 차감)</span>}
+                </span>
               </div>
               <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-amber-300 mt-0.5">
                 {selectedQuiz.id === 'reference_match'
@@ -263,12 +277,15 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
 
           {/* Reroll Button */}
           <button
-            onClick={() => initializeRandomQuiz()}
-            className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer shrink-0 active:scale-95"
-            title="다른 퀴즈 유형 뽑기"
+            onClick={handleRerollQuiz}
+            className="flex flex-col items-center justify-center bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer shrink-0 active:scale-95 shadow"
+            title={`다른 퀴즈로 변경 시 ${penaltyPerReroll}점이 차감됩니다.`}
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">다른 퀴즈</span>
+            <div className="flex items-center gap-1">
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>다른 퀴즈</span>
+            </div>
+            <span className="text-[9px] text-rose-300 font-semibold">(-{penaltyPerReroll}점 차감)</span>
           </button>
         </div>
 

@@ -828,6 +828,11 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
         </div>
       </div>
 
+      {/* DEVELOPER CREDIT BADGE */}
+      <div className="absolute top-16 right-2 sm:top-20 sm:right-4 z-20 pointer-events-none bg-slate-900/80 border border-amber-500/30 text-amber-200/90 px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-md backdrop-blur-sm">
+        개발자: Gabriel Byeongje Jeon
+      </div>
+
       {/* Waiting Lobby Overlay Alert when Waiting */}
       {gameSessionStatus === 'WAITING' && (
         <div className="absolute top-16 sm:top-20 left-1/2 -translate-x-1/2 z-20 bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-2.5 sm:p-4 text-center max-w-xs sm:max-w-sm w-11/12 shadow-2xl backdrop-blur-md">
