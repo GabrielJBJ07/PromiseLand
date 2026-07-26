@@ -6,6 +6,8 @@ import {
   X,
   RefreshCw,
   Award,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 
 interface ZepQuizModalProps {
@@ -100,101 +102,106 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
     setScrambledWords(shuffled);
     setSelectedWords([]);
 
-    // 2. Prepare Blank Options according to Difficulty
-    const primaryKeyword = verse.keywords[0] || '은혜';
-    const distractorBank = [
-      '은혜', '사랑', '소망', '믿음', '기쁨', '평안', '진리', '빛', '지혜', '생명', '구원', '축복'
-    ];
-    let selectedOptions = [primaryKeyword];
+    // 2. Prepare Blank Fill Quiz
+    const keyword = verse.keywords[0] || words[Math.floor(words.length / 2)] || '하나님';
+    setBlankAnswer(keyword);
 
-    const distractorCount = difficultyTier === 1 ? 2 : difficultyTier === 2 ? 3 : 4;
-    const shuffledBank = distractorBank.filter((w) => w !== primaryKeyword).sort(() => Math.random() - 0.5);
-
-    for (let i = 0; i < distractorCount; i++) {
-      if (shuffledBank[i]) selectedOptions.push(shuffledBank[i]);
-    }
-
-    setBlankOptions(selectedOptions.sort(() => Math.random() - 0.5));
-    setBlankAnswer('');
-
-    // 3. Prepare Reference Match Options (4 distinct scripture references)
+    // Generate 3 distractor keywords
     const otherVerses = BIBLE_VERSES.filter((v) => v.id !== verse.id);
-    const shuffledOthers = [...otherVerses].sort(() => Math.random() - 0.5);
-    const distractorRefs = shuffledOthers.slice(0, 3).map((v) => v.reference);
-    const refChoices = [verse.reference, ...distractorRefs].sort(() => Math.random() - 0.5);
-    setRefMatchOptions(refChoices);
+    const distractorPool: string[] = [];
+    otherVerses.forEach((v) => {
+      v.keywords.forEach((k) => {
+        if (k !== keyword && !distractorPool.includes(k)) {
+          distractorPool.push(k);
+        }
+      });
+    });
+
+    const shuffledDistractors = distractorPool.sort(() => Math.random() - 0.5).slice(0, 3);
+    const options = [keyword, ...shuffledDistractors].sort(() => Math.random() - 0.5);
+    setBlankOptions(options);
+
+    // 3. Prepare Reference Match Quiz
+    const otherRefs = otherVerses.map((v) => v.reference).sort(() => Math.random() - 0.5).slice(0, 3);
+    const refOptions = [verse.reference, ...otherRefs].sort(() => Math.random() - 0.5);
+    setRefMatchOptions(refOptions);
     setSelectedRefChoice('');
   };
 
-  // Initialize Quiz on Open or Verse change
   useEffect(() => {
-    initializeRandomQuiz();
-  }, [verse]);
+    if (isOpen && verse) {
+      initializeRandomQuiz();
+    }
+  }, [isOpen, verse]);
 
   if (!isOpen || !verse) return null;
 
-  // Handle Word Block Selection
+  // Point Calculation based on Difficulty
+  const pointsReward = difficultyTier === 1 ? 50 : difficultyTier === 2 ? 80 : 120;
+
+  // Handle selecting scrambled word block
   const handleSelectWordBlock = (word: string, index: number) => {
-    if (isCorrect !== null) return;
-    setSelectedWords((prev) => [...prev, word]);
-    setScrambledWords((prev) => prev.filter((_, i) => i !== index));
+    setSelectedWords([...selectedWords, word]);
+    setScrambledWords(scrambledWords.filter((_, idx) => idx !== index));
   };
 
+  // Handle deselecting word block from chosen row
   const handleDeselectWordBlock = (word: string, index: number) => {
-    if (isCorrect !== null) return;
-    setSelectedWords((prev) => prev.filter((_, i) => i !== index));
-    setScrambledWords((prev) => [...prev, word]);
+    setSelectedWords(selectedWords.filter((_, idx) => idx !== index));
+    setScrambledWords([...scrambledWords, word]);
   };
 
-  // Check Answers
-  const pointsReward = difficultyTier === 1 ? 150 : difficultyTier === 2 ? 250 : 350;
-
+  // Verify Word Order
   const handleVerifyWordOrder = () => {
-    const userPhrase = selectedWords.join(' ');
-    if (userPhrase === verse.text) {
-      triggerSuccess(pointsReward);
+    const userSentence = selectedWords.join(' ').replace(/\s+/g, ' ').trim();
+    const targetSentence = verse.text.replace(/\s+/g, ' ').trim();
+
+    if (userSentence === targetSentence) {
+      handleSuccess();
     } else {
-      triggerFailure('단어 순서가 맞지 않습니다. 천천히 기억을 떠올려 다시 맞춰보세요!');
+      handleFailure('단어 순서가 올바르지 않습니다. 다시 확인해보세요!');
     }
   };
 
-  const handleVerifyBlank = (selectedOption: string) => {
-    setBlankAnswer(selectedOption);
-    const primaryKeyword = verse.keywords[0] || '은혜';
-    if (selectedOption === primaryKeyword || verse.text.includes(selectedOption)) {
-      triggerSuccess(pointsReward);
+  // Verify Blank Option Choice
+  const handleVerifyBlank = (chosen: string) => {
+    if (chosen === blankAnswer) {
+      handleSuccess();
     } else {
-      triggerFailure('빈칸 단어가 틀렸습니다. 다시 생각해보세요!');
+      handleFailure(`'${chosen}'은(는) 올바른 빈칸 정답이 아닙니다. 다시 시도해보세요!`);
     }
   };
 
-  const handleVerifyRefMatch = (refChoice: string) => {
-    setSelectedRefChoice(refChoice);
-    if (refChoice === verse.reference) {
-      triggerSuccess(pointsReward);
+  // Verify Reference Match Option
+  const handleVerifyRefMatch = (chosenRef: string) => {
+    setSelectedRefChoice(chosenRef);
+    if (chosenRef === verse.reference) {
+      handleSuccess();
     } else {
-      triggerFailure(`아쉬워요! [${refChoice}] 구절이 아닙니다.`);
+      handleFailure(`'${chosenRef}'은(는) 올바른 장/절 주소가 아닙니다.`);
     }
   };
 
-  const triggerSuccess = (points: number) => {
+  // Handle Success Flow
+  const handleSuccess = () => {
     setIsCorrect(true);
-    setFeedbackMsg(`🎉 정답입니다! 말씀 암송 성공 (+${points}점)`);
+    setFeedbackMsg(`🎉 정답입니다! 말씀 암송 완료! (+${pointsReward}점 획득)`);
 
-    // Trigger Victory Confetti
     confetti({
       particleCount: 80,
       spread: 70,
       origin: { y: 0.6 },
     });
 
+    onCompleteVerse(verse.id, pointsReward);
+
     setTimeout(() => {
-      onCompleteVerse(verse.id, points);
       onClose();
     }, 1800);
   };
 
-  const triggerFailure = (msg: string) => {
+  // Handle Failure with Shield Protection Check
+  const handleFailure = (msg: string) => {
     if (hasShieldItem && !shieldUsed) {
       setShieldUsed(true);
       setFeedbackMsg('🛡️ 믿음의 방패로 실수를 1회 방어했습니다! 다시 시도하세요.');
@@ -205,22 +212,22 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
-      <div className="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl relative text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-2 sm:p-4 touch-manipulation">
+      <div className="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-4 sm:p-6 md:p-8 max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative text-white">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-amber-500/20 text-amber-400 p-2.5 rounded-2xl border border-amber-500/30">
-              <Award className="w-6 h-6" />
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3 sm:pb-4 sm:mb-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="bg-amber-500/20 text-amber-400 p-2 sm:p-2.5 rounded-2xl border border-amber-500/30 shrink-0">
+              <Award className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border ${difficultyColor}`}>
-                  난이도 {difficultyLabel}
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-md border ${difficultyColor}`}>
+                  {difficultyLabel}
                 </span>
-                <span className="text-xs text-amber-400 font-bold">미션 #{stationNum} 암송 도전</span>
+                <span className="text-[11px] sm:text-xs text-amber-400 font-bold">미션 #{stationNum}</span>
               </div>
-              <h2 className="text-lg md:text-xl font-extrabold text-amber-300 mt-0.5">
+              <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-amber-300 mt-0.5">
                 [{verse.reference}] 암송 테스트
               </h2>
             </div>
@@ -228,31 +235,32 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition cursor-pointer"
+            className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition cursor-pointer active:scale-95 shrink-0"
+            aria-label="Close"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
         {/* Single Randomized Quiz Header Banner */}
-        <div className="bg-gradient-to-r from-amber-500/20 to-sky-500/20 border border-amber-500/40 rounded-2xl p-3.5 mb-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl">{selectedQuiz.icon}</span>
+        <div className="bg-gradient-to-r from-amber-500/20 to-sky-500/20 border border-amber-500/40 rounded-2xl p-3 sm:p-3.5 mb-3 sm:mb-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <span className="text-xl sm:text-2xl">{selectedQuiz.icon}</span>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-extrabold bg-amber-500 text-slate-950 px-2 py-0.5 rounded-full">
+                <span className="text-[9px] sm:text-[10px] font-extrabold bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded-full">
                   랜덤 지정 퀴즈
                 </span>
-                <h3 className="font-extrabold text-sm text-white">{selectedQuiz.label}</h3>
+                <h3 className="font-extrabold text-xs sm:text-sm text-white">{selectedQuiz.label}</h3>
               </div>
-              <p className="text-xs text-slate-300 mt-0.5">{selectedQuiz.desc}</p>
+              <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5">{selectedQuiz.desc}</p>
             </div>
           </div>
 
           {/* Reroll Button */}
           <button
             onClick={() => initializeRandomQuiz()}
-            className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0"
+            className="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer shrink-0 active:scale-95"
             title="다른 퀴즈 유형 뽑기"
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -261,24 +269,24 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
         </div>
 
         {/* Quiz Content Container */}
-        <div className="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 mb-5 min-h-[200px] flex flex-col justify-between">
+        <div className="bg-slate-950/60 p-3.5 sm:p-5 rounded-2xl border border-slate-800 mb-4 min-h-[180px] flex flex-col justify-between">
           {/* TYPE 1: WORD ORDER SCRAMBLE */}
           {selectedQuiz.id === 'word_order' && (
-            <div className="space-y-4">
-              <div className="text-xs text-slate-300 font-bold flex items-center justify-between">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="text-[11px] sm:text-xs text-slate-300 font-bold flex items-center justify-between">
                 <span>[{verse.reference}] 의 암송 구절 순서를 바르게 맞추세요:</span>
               </div>
 
               {/* User Selected Area */}
-              <div className="min-h-[55px] bg-slate-900 border-2 border-dashed border-amber-500/40 rounded-xl p-3 flex flex-wrap gap-2 items-center">
+              <div className="min-h-[60px] bg-slate-900 border-2 border-dashed border-amber-500/40 rounded-xl p-2.5 sm:p-3 flex flex-wrap gap-2 items-center">
                 {selectedWords.length === 0 ? (
-                  <span className="text-xs text-slate-500">아래 조각을 클릭하면 순서대로 배치됩니다...</span>
+                  <span className="text-[11px] sm:text-xs text-slate-500">아래 말씀 조각을 터치하면 순서대로 배치됩니다...</span>
                 ) : (
                   selectedWords.map((word, idx) => (
                     <button
                       key={`selected_${idx}`}
                       onClick={() => handleDeselectWordBlock(word, idx)}
-                      className="bg-amber-500 text-slate-950 px-3 py-1.5 rounded-xl text-xs font-black shadow transition hover:bg-amber-400 cursor-pointer"
+                      className="bg-amber-500 active:bg-amber-400 text-slate-950 px-3 py-2 rounded-xl text-xs sm:text-sm font-black shadow transition cursor-pointer active:scale-95"
                     >
                       {word}
                     </button>
@@ -292,7 +300,7 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
                   <button
                     key={`scrambled_${idx}`}
                     onClick={() => handleSelectWordBlock(word, idx)}
-                    className="bg-slate-800 border border-slate-700 hover:border-amber-400 text-slate-200 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer"
+                    className="bg-slate-800 border border-slate-700 active:border-amber-400 text-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer active:scale-95"
                   >
                     {word}
                   </button>
@@ -303,7 +311,7 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
                 <button
                   onClick={handleVerifyWordOrder}
                   disabled={selectedWords.length === 0}
-                  className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs transition cursor-pointer"
+                  className="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-black px-5 py-3 rounded-xl text-xs sm:text-sm transition cursor-pointer active:scale-95"
                 >
                   정답 확인하기 (+{pointsReward}점)
                 </button>
@@ -313,20 +321,20 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
 
           {/* TYPE 2: BLANK FILL */}
           {selectedQuiz.id === 'blank_fill' && (
-            <div className="space-y-4">
-              <p className="text-xs text-slate-300 font-bold">
+            <div className="space-y-3 sm:space-y-4">
+              <p className="text-[11px] sm:text-xs text-slate-300 font-bold">
                 [{verse.reference}] 말씀 속 빈칸 `[ ___ ]` 에 들어갈 단어를 고르세요:
               </p>
-              <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-sm text-center font-bold text-amber-200 leading-relaxed">
+              <div className="bg-slate-900 p-3.5 sm:p-4 rounded-xl border border-slate-800 text-xs sm:text-sm text-center font-bold text-amber-200 leading-relaxed">
                 "{verse.text.replace(verse.keywords[0] || '', ' [ ___ ] ')}"
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
                 {blankOptions.map((option, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleVerifyBlank(option)}
-                    className="p-3 bg-slate-900 border border-slate-800 hover:border-amber-400 hover:bg-amber-500/10 text-white font-bold rounded-xl text-xs transition cursor-pointer text-center"
+                    className="p-3.5 bg-slate-900 border border-slate-800 active:border-amber-400 hover:bg-amber-500/10 text-white font-bold rounded-xl text-xs sm:text-sm transition cursor-pointer text-center active:scale-95 min-h-[44px]"
                   >
                     {option}
                   </button>
@@ -337,20 +345,20 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
 
           {/* TYPE 3: REFERENCE MATCHING QUIZ */}
           {selectedQuiz.id === 'reference_match' && (
-            <div className="space-y-4 text-center">
-              <p className="text-xs text-slate-300 font-bold">
+            <div className="space-y-3 sm:space-y-4 text-center">
+              <p className="text-[11px] sm:text-xs text-slate-300 font-bold">
                 아래 말씀에 해당하는 정확한 성경 구절 주소를 고르세요:
               </p>
-              <div className="bg-slate-900 p-4 rounded-xl border border-amber-500/30 text-amber-200 text-sm font-bold leading-relaxed shadow-inner">
+              <div className="bg-slate-900 p-3.5 sm:p-4 rounded-xl border border-amber-500/30 text-amber-200 text-xs sm:text-sm font-bold leading-relaxed shadow-inner">
                 "{verse.text}"
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
                 {refMatchOptions.map((refOpt, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleVerifyRefMatch(refOpt)}
-                    className={`p-3 rounded-xl text-xs font-black border transition cursor-pointer ${
+                    className={`p-3.5 rounded-xl text-xs sm:text-sm font-black border transition cursor-pointer active:scale-95 min-h-[44px] ${
                       selectedRefChoice === refOpt
                         ? 'bg-amber-500 text-slate-950 border-amber-400'
                         : 'bg-slate-900 border-slate-800 hover:border-amber-400 hover:bg-amber-500/10 text-amber-300'
@@ -367,7 +375,7 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
         {/* Feedback Area */}
         {feedbackMsg && (
           <div
-            className={`p-3.5 rounded-2xl text-xs font-bold text-center border animate-fadeIn ${
+            className={`p-3 sm:p-3.5 rounded-2xl text-xs sm:text-sm font-bold text-center border animate-fadeIn ${
               isCorrect
                 ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300'
                 : 'bg-rose-950/80 border-rose-500 text-rose-300'

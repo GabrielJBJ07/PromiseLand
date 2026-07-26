@@ -21,27 +21,28 @@ export const ItemInventoryModal: React.FC<ItemInventoryModalProps> = ({
   const completedCount = player.completedVerseIds.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
-      <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 md:p-8 max-w-xl w-full shadow-2xl relative text-white">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-          <div className="flex items-center gap-2">
-            <div className="bg-amber-500/20 text-amber-400 p-2 rounded-xl border border-amber-500/30">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-2 sm:p-4 touch-manipulation">
+      <div className="bg-slate-900 border border-amber-500/40 rounded-3xl p-4 sm:p-6 md:p-8 max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative text-white">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 sm:pb-4 sm:mb-6">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-amber-500/20 text-amber-400 p-2 rounded-xl border border-amber-500/30 shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-amber-300">믿음의 보물 인벤토리</h2>
-              <p className="text-xs text-slate-400">5구절 완송 시마다 전신 갑주와 보물이 해금됩니다.</p>
+              <h2 className="text-lg sm:text-xl font-bold text-amber-300">믿음의 보물 인벤토리</h2>
+              <p className="text-[11px] sm:text-xs text-slate-400">5구절 완송 시마다 전신 갑주와 보물이 해금됩니다.</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition cursor-pointer"
+            className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800 transition cursor-pointer active:scale-95 shrink-0"
+            aria-label="Close"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto pr-1">
           {GAME_ITEMS.map((item) => {
             const isUnlocked = completedCount >= item.milestoneVerseCount;
             const isEquipped = player.equippedItems.includes(item.id);
@@ -70,13 +71,13 @@ export const ItemInventoryModal: React.FC<ItemInventoryModalProps> = ({
                   {isUnlocked && (
                     <button
                       onClick={() => onToggleEquip(item.id)}
-                      className={`mt-2 px-2.5 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition cursor-pointer ${
+                      className={`mt-2 px-3 py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1 transition cursor-pointer active:scale-95 min-h-[36px] ${
                         isEquipped
                           ? 'bg-amber-500 text-slate-950 hover:bg-amber-400'
                           : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                       }`}
                     >
-                      {isEquipped ? <Check className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+                      {isEquipped ? <Check className="w-3.5 h-3.5" /> : <Shield className="w-3.5 h-3.5" />}
                       <span>{isEquipped ? '장착 중' : '장착하기'}</span>
                     </button>
                   )}
@@ -85,13 +86,6 @@ export const ItemInventoryModal: React.FC<ItemInventoryModalProps> = ({
             );
           })}
         </div>
-
-        <button
-          onClick={onClose}
-          className="w-full mt-6 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-xl text-xs transition cursor-pointer"
-        >
-          확인 완료
-        </button>
       </div>
     </div>
   );

@@ -50,8 +50,8 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
             2026 초등부 말씀 암송 대회
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-serif font-black text-amber-950 tracking-wider mb-2">
-            말 씀 암 송 수 료 증
+          <h1 className="text-2xl md:text-3xl font-serif font-black text-amber-950 tracking-wide mb-2">
+            Promise Land 암송아지 수료증
           </h1>
           <p className="text-xs text-amber-800 tracking-widest font-bold mb-6">
             CERTIFICATE OF HOLY BIBLE RECITATION
@@ -78,7 +78,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
 
           <div className="text-xs font-bold text-amber-900 space-y-1">
             <p>{todayStr}</p>
-            <p className="text-sm font-black pt-2">대한예수교장로회 초등부 말씀암송위원회</p>
+            <p className="text-sm font-black pt-2">대한예수교장로회 장충교회 초등부 Promise Land</p>
           </div>
         </div>
 
