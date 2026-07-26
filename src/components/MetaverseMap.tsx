@@ -41,15 +41,19 @@ interface MetaverseMapProps {
   onOpenDashboard: () => void;
   onOpenAIHelp: () => void;
   onOpenItemInventory: () => void;
+  onAddScorePoints?: (points: number) => void;
 }
 
 interface MapEntity {
   id: string;
   x: number;
   y: number;
-  type: 'verse_gate' | 'fruit' | 'finish_stage';
+  type: 'verse_gate' | 'fruit' | 'coin' | 'manna' | 'star' | 'finish_stage';
   verse?: BibleVerse;
   fruitType?: 'lemon' | 'orange' | 'apple';
+  emoji?: string;
+  scoreBonus?: number;
+  itemEffectName?: string;
   collected?: boolean;
   label?: string;
   stationNumber?: number;

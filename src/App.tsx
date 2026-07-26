@@ -195,6 +195,9 @@ export default function App() {
           onOpenDashboard={() => setIsDashboardOpen(true)}
           onOpenAIHelp={() => setIsAIHelpOpen(true)}
           onOpenItemInventory={() => setIsInventoryOpen(true)}
+          onAddScorePoints={(points) =>
+            setPlayer((prev) => (prev ? { ...prev, score: prev.score + points } : prev))
+          }
         />
       )}
 
