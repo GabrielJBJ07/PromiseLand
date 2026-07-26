@@ -1,0 +1,6 @@
+{
+  "name": "약속의 땅 말씀 암송 메타버스",
+  "description": "초등부 아이들을 위한 36구절 성경 말씀 암송 ZEP 퀴즈 스타일 메타버스 모험 게임",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
