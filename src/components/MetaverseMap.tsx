@@ -841,65 +841,69 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       )}
 
       {/* VIRTUAL D-PAD TOUCH CONTROLLER FOR MOBILE SMARTPHONES */}
-      <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-30 flex flex-col items-center gap-1 touch-manipulation">
+      <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-30 flex flex-col items-center gap-1 touch-manipulation select-none">
+        <div className="bg-slate-900/90 border border-amber-500/40 text-amber-300 font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-md mb-0.5 pointer-events-none">
+          🎮 방향키로 이동
+        </div>
+
         <button
-          onTouchStart={() => (touchDirections.current.up = true)}
-          onTouchEnd={() => (touchDirections.current.up = false)}
+          onTouchStart={(e) => { e.preventDefault(); touchDirections.current.up = true; }}
+          onTouchEnd={(e) => { e.preventDefault(); touchDirections.current.up = false; }}
           onMouseDown={() => (touchDirections.current.up = true)}
           onMouseUp={() => (touchDirections.current.up = false)}
           onMouseLeave={() => (touchDirections.current.up = false)}
-          className="w-11 h-11 sm:w-13 sm:h-13 bg-slate-900/90 hover:bg-amber-500/30 border-2 border-amber-500/50 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 select-none"
+          className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
           aria-label="위로 이동"
         >
-          <ArrowUp className="w-6 h-6 stroke-[3]" />
+          <ArrowUp className="w-7 h-7 stroke-[3]" />
         </button>
 
         <div className="flex items-center gap-2">
           <button
-            onTouchStart={() => (touchDirections.current.left = true)}
-            onTouchEnd={() => (touchDirections.current.left = false)}
+            onTouchStart={(e) => { e.preventDefault(); touchDirections.current.left = true; }}
+            onTouchEnd={(e) => { e.preventDefault(); touchDirections.current.left = false; }}
             onMouseDown={() => (touchDirections.current.left = true)}
             onMouseUp={() => (touchDirections.current.left = false)}
             onMouseLeave={() => (touchDirections.current.left = false)}
-            className="w-11 h-11 sm:w-13 sm:h-13 bg-slate-900/90 hover:bg-amber-500/30 border-2 border-amber-500/50 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 select-none"
+            className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
             aria-label="왼쪽으로 이동"
           >
-            <ArrowLeft className="w-6 h-6 stroke-[3]" />
+            <ArrowLeft className="w-7 h-7 stroke-[3]" />
           </button>
 
           {/* Quick Auto-Walk Button to Next Verse */}
           <button
             onClick={handleAutoMoveToNextVerse}
-            className="w-11 h-11 sm:w-13 sm:h-13 bg-amber-500/20 border border-amber-500/60 active:bg-amber-500 text-amber-300 active:text-slate-950 rounded-2xl flex flex-col items-center justify-center text-[9px] font-black shadow-lg transition active:scale-95"
+            className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 text-amber-300 active:text-slate-950 rounded-2xl flex flex-col items-center justify-center text-[10px] font-black shadow-xl transition active:scale-90 cursor-pointer"
             title="다음 말씀 구절 위치로 자동 이동"
           >
-            <Compass className="w-4 h-4 mb-0.5" />
+            <Compass className="w-5 h-5 mb-0.5" />
             <span>워프</span>
           </button>
 
           <button
-            onTouchStart={() => (touchDirections.current.right = true)}
-            onTouchEnd={() => (touchDirections.current.right = false)}
+            onTouchStart={(e) => { e.preventDefault(); touchDirections.current.right = true; }}
+            onTouchEnd={(e) => { e.preventDefault(); touchDirections.current.right = false; }}
             onMouseDown={() => (touchDirections.current.right = true)}
             onMouseUp={() => (touchDirections.current.right = false)}
             onMouseLeave={() => (touchDirections.current.right = false)}
-            className="w-11 h-11 sm:w-13 sm:h-13 bg-slate-900/90 hover:bg-amber-500/30 border-2 border-amber-500/50 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 select-none"
+            className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
             aria-label="오른쪽으로 이동"
           >
-            <ArrowRight className="w-6 h-6 stroke-[3]" />
+            <ArrowRight className="w-7 h-7 stroke-[3]" />
           </button>
         </div>
 
         <button
-          onTouchStart={() => (touchDirections.current.down = true)}
-          onTouchEnd={() => (touchDirections.current.down = false)}
+          onTouchStart={(e) => { e.preventDefault(); touchDirections.current.down = true; }}
+          onTouchEnd={(e) => { e.preventDefault(); touchDirections.current.down = false; }}
           onMouseDown={() => (touchDirections.current.down = true)}
           onMouseUp={() => (touchDirections.current.down = false)}
           onMouseLeave={() => (touchDirections.current.down = false)}
-          className="w-11 h-11 sm:w-13 sm:h-13 bg-slate-900/90 hover:bg-amber-500/30 border-2 border-amber-500/50 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 select-none"
+          className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
           aria-label="아래로 이동"
         >
-          <ArrowDown className="w-6 h-6 stroke-[3]" />
+          <ArrowDown className="w-7 h-7 stroke-[3]" />
         </button>
       </div>
 
