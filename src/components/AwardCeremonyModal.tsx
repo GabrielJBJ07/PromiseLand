@@ -41,11 +41,11 @@ export const AwardCeremonyModal: React.FC<AwardCeremonyModalProps> = ({
   const remaining = sorted.slice(3);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-xl p-3 sm:p-6 overflow-y-auto touch-manipulation">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-xl p-1.5 sm:p-6 overflow-y-auto touch-pan-y">
       {/* Decorative Fireworks Rays */}
       <div className="absolute inset-0 bg-radial from-amber-500/20 via-slate-950 to-slate-950 pointer-events-none animate-pulse" />
 
-      <div className="bg-slate-900/95 border-2 border-amber-500/60 rounded-3xl p-4 sm:p-6 md:p-8 max-w-4xl w-full shadow-2xl relative text-white flex flex-col my-auto max-h-[94vh] overflow-y-auto">
+      <div className="bg-slate-900/95 border-2 border-amber-500/60 rounded-3xl p-3 sm:p-6 md:p-8 max-w-4xl w-full shadow-2xl relative text-white flex flex-col my-auto max-h-[88vh] sm:max-h-[94vh] overflow-y-auto overscroll-contain touch-pan-y">
         {/* Close Button */}
         <button
           onClick={onClose}

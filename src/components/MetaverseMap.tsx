@@ -229,7 +229,59 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
     return list;
   });
 
-  // Calculate speed multiplier based on items
+  // Canvas Touch / Mouse Drag Movement Handler
+  const handleCanvasTouchStartOrMove = (e: React.TouchEvent<HTMLCanvasElement> | React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    let clientX = 0;
+    let clientY = 0;
+
+    if ('touches' in e && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if ('clientX' in e) {
+      if (e.buttons !== 1) return; // Only move on left mouse button held down
+      clientX = e.clientX;
+      clientY = e.clientY;
+    } else {
+      return;
+    }
+
+    const touchX = clientX - rect.left;
+    const touchY = clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const dx = touchX - centerX;
+    const dy = touchY - centerY;
+
+    const deadZone = 20; // 20px deadzone in center
+
+    touchDirections.current = {
+      left: dx < -deadZone,
+      right: dx > deadZone,
+      up: dy < -deadZone,
+      down: dy > deadZone,
+    };
+  };
+
+  const handleCanvasTouchEnd = () => {
+    touchDirections.current = { up: false, down: false, left: false, right: false };
+  };
+
+  // Helper to walk automatically to next verse mission
+  const handleAutoMoveToNextVerse = () => {
+    const completedIds = player.completedVerseIds;
+    const nextVerseId = completedIds.length + 1;
+    const nextTarget = pathWaypoints[Math.min(35, nextVerseId - 1)];
+
+    if (nextTarget) {
+      setPlayerPos({ x: nextTarget.x, y: nextTarget.y });
+    }
+  };
   const speedBonus = player.equippedItems.includes('shoes_peace')
     ? 1.35
     : player.equippedItems.includes('belt_truth')
@@ -587,23 +639,32 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-slate-950 select-none touch-none">
-      {/* 2D Canvas Viewport */}
-      <canvas ref={canvasRef} className="block w-full h-full cursor-grab active:cursor-grabbing" />
+      {/* 2D Canvas Viewport with Touch / Drag Movement */}
+      <canvas
+        ref={canvasRef}
+        onTouchStart={handleCanvasTouchStartOrMove}
+        onTouchMove={handleCanvasTouchStartOrMove}
+        onTouchEnd={handleCanvasTouchEnd}
+        onMouseDown={handleCanvasTouchStartOrMove}
+        onMouseMove={handleCanvasTouchStartOrMove}
+        onMouseUp={handleCanvasTouchEnd}
+        className="block w-full h-full cursor-grab active:cursor-grabbing"
+      />
 
       {/* TEACHER TOP CONTROL BAR (교사 제어 및 학생 모니터링 바) */}
-      <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-4 z-30 flex flex-wrap items-center justify-between gap-2 bg-slate-900/90 border border-amber-500/40 rounded-2xl p-2.5 sm:p-3 shadow-2xl backdrop-blur-md">
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="bg-amber-500/20 text-amber-400 p-2 rounded-xl border border-amber-500/30">
-            <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
+      <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-4 z-30 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 bg-slate-900/90 border border-amber-500/40 rounded-2xl p-2 sm:p-3 shadow-2xl backdrop-blur-md max-w-full">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <div className="bg-amber-500/20 text-amber-400 p-1.5 sm:p-2 rounded-xl border border-amber-500/30">
+            <Trophy className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-xs sm:text-sm text-amber-300">
-                2026 초등부 '약속의 땅' 교사 모니터링
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="font-extrabold text-[11px] sm:text-sm text-amber-300">
+                약속의 땅 말씀 메타버스
               </span>
               <span
-                className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                className={`text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md ${
                   gameSessionStatus === 'WAITING'
                     ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
                     : gameSessionStatus === 'PLAYING'
@@ -612,10 +673,10 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
                 }`}
               >
                 {gameSessionStatus === 'WAITING'
-                  ? '⏳ 대기 중 (QR 스캔 대기)'
+                  ? '⏳ 대기'
                   : gameSessionStatus === 'PLAYING'
-                  ? '🟢 게임 진행 중'
-                  : '🏆 게임 종료됨'}
+                  ? '🟢 진행중'
+                  : '🏆 종료됨'}
               </span>
             </div>
 
@@ -626,18 +687,18 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
         </div>
 
         {/* Teacher Game Session Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {/* Invite Students QR */}
           <button
             onClick={onOpenQRModal}
-            className="flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs shadow-md transition cursor-pointer active:scale-95"
+            className="flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-[11px] sm:text-xs shadow-md transition cursor-pointer active:scale-95"
           >
             <QrCode className="w-3.5 h-3.5" />
-            <span>QR 초대</span>
+            <span>QR</span>
           </button>
 
           {/* Joined Count */}
-          <div className="bg-slate-950 border border-slate-800 text-slate-300 px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5">
+          <div className="bg-slate-950 border border-slate-800 text-slate-300 px-2 py-1 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-1">
             <Users className="w-3.5 h-3.5 text-emerald-400" />
             <span>{joinedStudents.length}명</span>
           </div>
@@ -646,10 +707,10 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
           {gameSessionStatus === 'WAITING' && (
             <button
               onClick={onStartGameSession}
-              className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs shadow-lg transition cursor-pointer active:scale-95 animate-bounce"
+              className="flex items-center gap-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs shadow-lg transition cursor-pointer active:scale-95 animate-bounce"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>게임 시작</span>
+              <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
+              <span>시작</span>
             </button>
           )}
 
@@ -657,10 +718,10 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
           {gameSessionStatus === 'PLAYING' && (
             <button
               onClick={onEndGameSession}
-              className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs shadow-lg transition cursor-pointer active:scale-95"
+              className="flex items-center gap-1 bg-rose-600 hover:bg-rose-500 text-white font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs shadow-lg transition cursor-pointer active:scale-95"
             >
-              <Square className="w-3.5 h-3.5 fill-current" />
-              <span>게임 종료</span>
+              <Square className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
+              <span>종료</span>
             </button>
           )}
 
@@ -668,71 +729,134 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
           {gameSessionStatus === 'ENDED' && (
             <button
               onClick={onOpenAwardCeremony}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs shadow-lg transition cursor-pointer active:scale-95"
+              className="flex items-center gap-1 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs shadow-lg transition cursor-pointer active:scale-95"
             >
               <Award className="w-3.5 h-3.5" />
-              <span>시상식 보기</span>
+              <span>시상식</span>
             </button>
           )}
 
           {/* Dashboard Button */}
           <button
             onClick={onOpenDashboard}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-xl border border-slate-700 transition cursor-pointer active:scale-95 shrink-0"
+            className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-1.5 sm:p-2 rounded-xl border border-slate-700 transition cursor-pointer active:scale-95 shrink-0"
             title="실시간 현황 대시보드"
           >
-            <BarChart2 className="w-4 h-4" />
+            <BarChart2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         </div>
       </div>
 
       {/* Waiting Lobby Overlay Alert when Waiting */}
       {gameSessionStatus === 'WAITING' && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-3 sm:p-4 text-center max-w-sm w-11/12 shadow-2xl backdrop-blur-md">
-          <div className="inline-flex items-center gap-1.5 text-amber-400 text-xs font-extrabold mb-1">
-            <Sparkles className="w-4 h-4" /> 교사 게임 시작 대기 중 <Sparkles className="w-4 h-4" />
+        <div className="absolute top-16 sm:top-20 left-1/2 -translate-x-1/2 z-20 bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-2.5 sm:p-4 text-center max-w-xs sm:max-w-sm w-11/12 shadow-2xl backdrop-blur-md">
+          <div className="inline-flex items-center gap-1 text-amber-400 text-xs font-extrabold mb-0.5">
+            <Sparkles className="w-3.5 h-3.5" /> 게임 시작 대기 중 <Sparkles className="w-3.5 h-3.5" />
           </div>
-          <p className="text-[11px] sm:text-xs text-slate-300">
-            학생들은 QR코드를 스캔하여 게임에 접속해주세요. 교사가 상단 <strong className="text-emerald-400">‘게임 시작’</strong> 버튼을 누르면 시작됩니다.
+          <p className="text-[10px] sm:text-xs text-slate-300">
+            QR코드로 학생들을 가나안 복지에 초대하세요. 상단 <strong className="text-emerald-400">‘시작’</strong> 버튼을 누르면 정식 암송 미션이 시작됩니다.
           </p>
         </div>
       )}
 
+      {/* VIRTUAL D-PAD TOUCH CONTROLLER FOR MOBILE SMARTPHONES */}
+      <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-30 flex flex-col items-center gap-1 touch-manipulation">
+        <button
+          onTouchStart={() => (touchDirections.current.up = true)}
+          onTouchEnd={() => (touchDirections.current.up = false)}
+          onMouseDown={() => (touchDirections.current.up = true)}
+          onMouseUp={() => (touchDirections.current.up = false)}
+          onMouseLeave={() => (touchDirections.current.up = false)}
+          className="w-11 h-11 sm:w-13 sm:h-13 bg-slate-900/90 hover:bg-amber-500/30 border-2 border-amber-500/50 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 select-none"
+          aria-label="위로 이동"
+        >
+          <ArrowUp className="w-6 h-6 stroke-[3]" />
+        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onTouchStart={() => (touchDirections.current.left = true)}
+            onTouchEnd={() => (touchDirections.current.left = false)}
+            onMouseDown={() => (touchDirections.current.left = true)}
+            onMouseUp={() => (touchDirections.current.left = false)}
+            onMouseLeave={() => (touchDirections.current.left = false)}
+            className="w-11 h-11 sm:w-13 sm:h-13 bg-slate-900/90 hover:bg-amber-500/30 border-2 border-amber-500/50 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 select-none"
+            aria-label="왼쪽으로 이동"
+          >
+            <ArrowLeft className="w-6 h-6 stroke-[3]" />
+          </button>
+
+          {/* Quick Auto-Walk Button to Next Verse */}
+          <button
+            onClick={handleAutoMoveToNextVerse}
+            className="w-11 h-11 sm:w-13 sm:h-13 bg-amber-500/20 border border-amber-500/60 active:bg-amber-500 text-amber-300 active:text-slate-950 rounded-2xl flex flex-col items-center justify-center text-[9px] font-black shadow-lg transition active:scale-95"
+            title="다음 말씀 구절 위치로 자동 이동"
+          >
+            <Compass className="w-4 h-4 mb-0.5" />
+            <span>워프</span>
+          </button>
+
+          <button
+            onTouchStart={() => (touchDirections.current.right = true)}
+            onTouchEnd={() => (touchDirections.current.right = false)}
+            onMouseDown={() => (touchDirections.current.right = true)}
+            onMouseUp={() => (touchDirections.current.right = false)}
+            onMouseLeave={() => (touchDirections.current.right = false)}
+            className="w-11 h-11 sm:w-13 sm:h-13 bg-slate-900/90 hover:bg-amber-500/30 border-2 border-amber-500/50 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 select-none"
+            aria-label="오른쪽으로 이동"
+          >
+            <ArrowRight className="w-6 h-6 stroke-[3]" />
+          </button>
+        </div>
+
+        <button
+          onTouchStart={() => (touchDirections.current.down = true)}
+          onTouchEnd={() => (touchDirections.current.down = false)}
+          onMouseDown={() => (touchDirections.current.down = true)}
+          onMouseUp={() => (touchDirections.current.down = false)}
+          onMouseLeave={() => (touchDirections.current.down = false)}
+          className="w-11 h-11 sm:w-13 sm:h-13 bg-slate-900/90 hover:bg-amber-500/30 border-2 border-amber-500/50 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 select-none"
+          aria-label="아래로 이동"
+        >
+          <ArrowDown className="w-6 h-6 stroke-[3]" />
+        </button>
+      </div>
+
       {/* Active Gate Quick Interaction Bar */}
       {activeGate && gameSessionStatus !== 'ENDED' && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-3 sm:p-4 max-w-sm w-11/12 shadow-2xl backdrop-blur-md text-white flex items-center justify-between gap-3 animate-bounce">
+        <div className="absolute bottom-16 sm:bottom-20 left-1/2 -translate-x-1/2 z-30 bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-2.5 sm:p-4 max-w-xs sm:max-w-sm w-11/12 shadow-2xl backdrop-blur-md text-white flex items-center justify-between gap-2 animate-bounce">
           <div className="min-w-0">
-            <span className="text-[10px] text-amber-400 font-extrabold uppercase tracking-wide block">
+            <span className="text-[9px] sm:text-[10px] text-amber-400 font-extrabold uppercase tracking-wide block">
               미션 #{activeGate.id} 구절 포착!
             </span>
-            <p className="text-xs font-bold text-amber-200 truncate">[{activeGate.reference}]</p>
+            <p className="text-[11px] sm:text-xs font-bold text-amber-200 truncate">[{activeGate.reference}]</p>
           </div>
           <button
             onClick={() => onOpenQuiz(activeGate!)}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg transition shrink-0 cursor-pointer active:scale-95 flex items-center gap-1.5 min-h-[40px]"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs shadow-lg transition shrink-0 cursor-pointer active:scale-95 flex items-center gap-1 min-h-[36px]"
           >
-            <BookOpen className="w-4 h-4" />
-            <span>암송 퀴즈 풀기</span>
+            <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>암송 풀기</span>
           </button>
         </div>
       )}
 
       {/* Bottom Floating Quick Actions Bar */}
-      <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-30 flex items-center gap-2">
+      <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-30 flex items-center gap-1.5 sm:gap-2">
         <button
           onClick={onOpenItemInventory}
-          className="bg-slate-900/90 border border-slate-700 hover:border-amber-400 text-amber-300 font-bold px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-xl transition cursor-pointer active:scale-95"
+          className="bg-slate-900/90 border border-slate-700 hover:border-amber-400 text-amber-300 font-bold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl text-xs flex items-center gap-1 shadow-xl transition cursor-pointer active:scale-95"
         >
-          <Flame className="w-4 h-4 text-amber-400" />
-          <span className="hidden sm:inline">전신갑주</span>
+          <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
+          <span className="text-[11px] sm:text-xs">전신갑주</span>
         </button>
 
         <button
           onClick={onOpenAIHelp}
-          className="bg-purple-600 hover:bg-purple-500 text-white font-extrabold px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-xl transition cursor-pointer active:scale-95"
+          className="bg-purple-600 hover:bg-purple-500 text-white font-extrabold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl text-xs flex items-center gap-1 shadow-xl transition cursor-pointer active:scale-95"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>AI 튜터</span>
+          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span className="text-[11px] sm:text-xs">AI 튜터</span>
         </button>
       </div>
     </div>

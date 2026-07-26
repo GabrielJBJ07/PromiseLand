@@ -64,7 +64,7 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
   const OUTFIT_COLORS = ['#2B5797', '#9C27B0', '#059669', '#DB2777', '#2563EB', '#0D9488', '#7C3AED', '#D97706'];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex flex-col justify-center items-center p-3 sm:p-4 relative overflow-y-auto touch-manipulation">
+    <div className="min-h-screen bg-slate-900 text-white flex flex-col justify-center items-center p-2 sm:p-4 relative overflow-y-auto overscroll-contain touch-pan-y">
       {/* Background decoration gradient and floating stars */}
       <div className="absolute inset-0 bg-radial from-amber-900/30 via-slate-900 to-slate-950 pointer-events-none" />
       <div className="absolute top-3 right-3 sm:top-6 sm:right-6 z-20">

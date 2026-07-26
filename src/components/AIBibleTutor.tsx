@@ -47,8 +47,8 @@ export const AIBibleTutor: React.FC<AIBibleTutorProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-2 sm:p-4 touch-manipulation">
-      <div className="bg-slate-900 border-2 border-purple-500/40 rounded-3xl p-4 sm:p-6 md:p-8 max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-1.5 sm:p-4 touch-pan-y overflow-y-auto">
+      <div className="bg-slate-900 border-2 border-purple-500/40 rounded-3xl p-3.5 sm:p-6 md:p-8 max-w-xl w-full max-h-[88vh] sm:max-h-[92vh] overflow-y-auto overscroll-contain touch-pan-y shadow-2xl relative text-white my-auto">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 sm:pb-4 sm:mb-6">
           <div className="flex items-center gap-2.5">
             <div className="bg-purple-500/20 text-purple-300 p-2 sm:p-2.5 rounded-2xl border border-purple-500/30 shrink-0">

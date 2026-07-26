@@ -54,8 +54,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-2 sm:p-4 touch-manipulation">
-      <div className="bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-3.5 sm:p-6 md:p-8 max-w-4xl w-full shadow-2xl relative text-white flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-1.5 sm:p-4 touch-pan-y overflow-y-auto">
+      <div className="bg-slate-900 border-2 border-amber-500/40 rounded-3xl p-3 sm:p-6 md:p-8 max-w-4xl w-full shadow-2xl relative text-white flex flex-col max-h-[88vh] sm:max-h-[92vh] my-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 sm:pb-4 sm:mb-6 shrink-0">
           <div className="flex items-center gap-2.5 sm:gap-3">
@@ -134,7 +134,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* TAB 1: REALTIME LEADERBOARD */}
         {activeTab === 'leaderboard' && (
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+          <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y space-y-3 pr-1">
             {/* Grade Filters */}
             <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-3 flex-wrap">
               <div className="flex items-center gap-1.5">
@@ -245,7 +245,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* TAB 2: TEACHER ADMIN & CERTIFICATE PRINTING */}
         {activeTab === 'teacher_admin' && (
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+          <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y space-y-4 pr-1">
             <div className="bg-emerald-950/40 border border-emerald-500/30 p-3.5 sm:p-4 rounded-2xl text-xs text-emerald-200 flex items-center justify-between">
               <div>
                 <span className="font-bold block mb-1">🏫 초등부 담당 교사 전용 실시간 현황:</span>
@@ -335,7 +335,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* TAB 3: 36 BIBLE VERSE MATRIX */}
         {activeTab === 'verse_matrix' && (
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+          <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y space-y-4 pr-1">
             <div className="flex items-center justify-between bg-slate-950 p-3 sm:p-4 rounded-2xl border border-slate-800">
               <div className="text-xs font-bold text-amber-300">
                 📌 {selectedStudentForMatrix ? `${selectedStudentForMatrix.name} 학생의` : '나의'} 36구절 암송 완료 체크표

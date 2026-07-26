@@ -212,8 +212,8 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-2 sm:p-4 touch-manipulation">
-      <div className="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-4 sm:p-6 md:p-8 max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-1.5 sm:p-4 touch-pan-y overflow-y-auto">
+      <div className="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-3 sm:p-6 md:p-8 max-w-2xl w-full max-h-[88vh] sm:max-h-[92vh] overflow-y-auto overscroll-contain touch-pan-y shadow-2xl relative text-white my-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3 sm:pb-4 sm:mb-4">
           <div className="flex items-center gap-2.5 sm:gap-3">

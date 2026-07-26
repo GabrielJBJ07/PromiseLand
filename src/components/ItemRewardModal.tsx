@@ -24,8 +24,8 @@ export const ItemRewardModal: React.FC<ItemRewardModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
-      <div className="bg-slate-900 border-2 border-amber-400 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative text-white text-center animate-bounce-short">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-2 sm:p-4 touch-pan-y overflow-y-auto">
+      <div className="bg-slate-900 border-2 border-amber-400 rounded-3xl p-4 sm:p-6 md:p-8 max-w-md w-full max-h-[88vh] sm:max-h-[92vh] overflow-y-auto overscroll-contain touch-pan-y shadow-2xl relative text-white text-center my-auto">
         <div className="inline-flex items-center gap-1.5 bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3.5 py-1 rounded-full text-xs font-bold mb-4">
           <Sparkles className="w-4 h-4 text-amber-400" />
           <span>{item.milestoneVerseCount}구절 완송 보상 달성!</span>
