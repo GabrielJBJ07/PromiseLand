@@ -77,17 +77,41 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
         </button>
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl bg-slate-800/90 border border-amber-500/30 rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl backdrop-blur-md my-4 sm:my-6">
+      {/* Top Banner for Mobile/iOS Standalone Launch & Anti-Cookie-Block */}
+      <div className="relative z-10 w-full max-w-4xl bg-slate-800/90 border border-emerald-500/50 rounded-2xl p-3 sm:p-4 mb-3 shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">📱</span>
+          <div>
+            <div className="text-xs sm:text-sm font-extrabold text-emerald-400">
+              아이폰/모바일 쿠키 차단 해결 (노로그인 무계정 접속)
+            </div>
+            <p className="text-[11px] sm:text-xs text-slate-300">
+              로그인 없이 이름만 입력하면 접속됩니다. 아이폰 Safari 사용자는 [새 창으로 전체화면 열기]를 누르면 쾌적하게 플레이할 수 있습니다.
+            </p>
+          </div>
+        </div>
+
+        <a
+          href={typeof window !== 'undefined' ? window.location.href : '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3.5 py-2 rounded-xl text-xs sm:text-sm shadow-lg transition active:scale-95 inline-flex items-center gap-1 cursor-pointer"
+        >
+          <span>📱 새 창(전체화면)으로 열기</span>
+        </a>
+      </div>
+
+      <div className="relative z-10 w-full max-w-4xl bg-slate-800/90 border border-amber-500/30 rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl backdrop-blur-md my-2 sm:my-4">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
           <div className="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold mb-2 sm:mb-3">
-            <Shield className="w-4 h-4" /> 초등부 2026 말씀 암송 메타버스
+            <Shield className="w-4 h-4" /> 초등부 말씀 암송 메타버스 (로그인 없이 즉시 참여)
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-amber-400 tracking-tight mb-2">
             ‘약속의 땅’으로 향하는 ‘믿음의 여정’
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm md:text-base">
-            성경 캐릭터를 만들고 36구절 암송 미션을 완수하여 가나안 복지에 입성하세요!
+            별도의 회원가입/비밀번호 없이 내 이름만 적으면 즉시 캐릭터가 생성됩니다!
           </p>
         </div>
 
@@ -113,17 +137,35 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
 
             {/* Name Input */}
             <div className="w-full mb-4">
-              <label className="block text-xs font-bold text-slate-300 mb-1">
-                이름 (성함 및 반)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-slate-300">
+                  학생 이름 (성함 및 반)
+                </label>
+                <span className="text-[10px] text-amber-400 font-bold bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30">
+                  로그인 불필요
+                </span>
+              </div>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="예: 김믿음 (5학년 1반)"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 text-sm"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 text-sm font-semibold"
                 required
               />
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                <span className="text-[10px] text-slate-400 font-medium self-center">빠른선택:</span>
+                {['김믿음', '이신앙', '박소망', '최사랑', '한은혜'].map((quickName) => (
+                  <button
+                    key={quickName}
+                    type="button"
+                    onClick={() => setName(quickName)}
+                    className="text-[10px] bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 px-2 py-1 rounded-lg transition cursor-pointer active:scale-95"
+                  >
+                    {quickName}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Grade Selection */}
