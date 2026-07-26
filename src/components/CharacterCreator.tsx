@@ -276,7 +276,7 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
             </div>
           )}
 
-          {/* STEP 2: BIBLE CHARACTER PRESET SELECTION (4 Male, 4 Female) */}
+          {/* STEP 2: BIBLE CHARACTER PRESET SELECTION */}
           {currentStep === 2 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between mb-1">
@@ -284,15 +284,14 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
                   <Award className="w-4 h-4 text-amber-400" /> 성경 인물 캐릭터를 선택하세요
                 </h3>
                 <span className="text-[10px] text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                  남성 4명 / 여성 4명
+                  대표 인물 8명
                 </span>
               </div>
 
               {/* 4x2 Compact Grid for All 8 Characters */}
               <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
-                {CHARACTER_PRESETS.map((p, idx) => {
+                {CHARACTER_PRESETS.map((p) => {
                   const isSelected = selectedPreset.id === p.id;
-                  const isMale = idx < 4;
                   return (
                     <button
                       key={p.id}
@@ -307,9 +306,9 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
                       <SpriteCanvas preset={p} size={36} animated={isSelected} />
                       <div className="w-full">
                         <div className="text-[11px] font-extrabold text-amber-200 truncate">{p.name}</div>
-                        <span className={`text-[9px] font-bold px-1 rounded ${isMale ? 'bg-blue-500/30 text-blue-300' : 'bg-pink-500/30 text-pink-300'}`}>
-                          {isMale ? '남성' : '여성'}
-                        </span>
+                        <div className="text-[9px] text-slate-400 font-medium truncate">
+                          {p.title}
+                        </div>
                       </div>
                     </button>
                   );

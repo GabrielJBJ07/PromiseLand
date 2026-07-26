@@ -674,22 +674,22 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       />
 
       {/* MOBILE GAME TOP HUD & CONTROL BAR */}
-      <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-4 z-30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pointer-events-none">
+      <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-4 z-30 flex flex-col landscape:flex-row sm:flex-row items-stretch landscape:items-center sm:items-center justify-between gap-1.5 sm:gap-2 pointer-events-none">
         
         {/* TOP LEFT: MOBILE PLAYER PROFILE & FAITH STATS CARD */}
-        <div className="pointer-events-auto bg-slate-900/95 border-2 border-amber-500/50 rounded-2xl p-2 sm:p-2.5 shadow-2xl backdrop-blur-md flex items-center justify-between sm:justify-start gap-2 sm:gap-3 max-w-full">
+        <div className="pointer-events-auto bg-slate-900/95 border-2 border-amber-500/50 rounded-2xl p-1.5 sm:p-2.5 shadow-2xl backdrop-blur-md flex items-center justify-between sm:justify-start gap-2 sm:gap-3 max-w-full">
           {/* Avatar Thumbnail */}
           <div className="relative shrink-0">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-slate-950 border-2 border-amber-400 rounded-xl overflow-hidden flex items-center justify-center shadow-inner">
+            <div className="w-8 h-8 sm:w-11 sm:h-11 bg-slate-950 border-2 border-amber-400 rounded-xl overflow-hidden flex items-center justify-center shadow-inner">
               <SpriteCanvas
                 config={player.character}
-                width={36}
-                height={36}
+                width={32}
+                height={32}
                 direction="down"
               />
             </div>
             {/* Level Badge */}
-            <span className="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-md border border-slate-900 shadow">
+            <span className="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-[8px] sm:text-[9px] font-black px-1 py-0.1 rounded-md border border-slate-900 shadow">
               Lv.{Math.floor(player.completedVerseIds.length / 3) + 1}
             </span>
           </div>
@@ -697,28 +697,28 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
           {/* Name & Stats */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-xs sm:text-sm text-white truncate max-w-[90px] sm:max-w-[120px]">
+              <span className="font-extrabold text-xs sm:text-sm text-white truncate max-w-[80px] sm:max-w-[120px]">
                 {player.name}
               </span>
-              <span className="text-[9px] font-bold px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded">
+              <span className="text-[8px] sm:text-[9px] font-bold px-1 py-0.1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded">
                 {player.grade}
               </span>
             </div>
 
             {/* Hearts & Score */}
-            <div className="flex items-center gap-2 mt-0.5">
+            <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5">
               <div className="flex items-center gap-0.5 text-rose-400">
-                <Heart className="w-3 h-3 fill-current animate-pulse" />
-                <Heart className="w-3 h-3 fill-current" />
-                <Heart className="w-3 h-3 fill-current" />
+                <Heart className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current animate-pulse" />
+                <Heart className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
+                <Heart className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" />
               </div>
 
-              <div className="flex items-center gap-1 text-amber-300 text-[10px] sm:text-xs font-black">
-                <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+              <div className="flex items-center gap-0.5 text-amber-300 text-[10px] sm:text-xs font-black">
+                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-400 fill-amber-400" />
                 <span>{player.score}P</span>
               </div>
 
-              <div className="text-[10px] text-emerald-400 font-bold ml-1">
+              <div className="text-[9px] sm:text-[10px] text-emerald-400 font-bold ml-1">
                 {player.completedVerseIds.length}/36 완송
               </div>
             </div>
@@ -727,7 +727,7 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
           {/* PRAISE BGM AUDIO TOGGLE BUTTON */}
           <button
             onClick={handleToggleBgm}
-            className={`pointer-events-auto shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer active:scale-95 border shadow-lg ${
+            className={`pointer-events-auto shrink-0 flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl text-xs font-black transition cursor-pointer active:scale-95 border shadow-lg ${
               isBgmPlaying
                 ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-emerald-500/30'
                 : 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-amber-500/40'
@@ -736,22 +736,22 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
           >
             {isBgmPlaying ? (
               <>
-                <Volume2 className="w-4 h-4 animate-bounce text-slate-950" />
-                <span className="hidden sm:inline text-[11px]">찬양 BGM ON</span>
-                <span className="sm:hidden text-[10px]">BGM ON</span>
+                <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-bounce text-slate-950" />
+                <span className="hidden sm:inline text-[11px]">BGM ON</span>
+                <span className="sm:hidden text-[9px]">ON</span>
               </>
             ) : (
               <>
-                <VolumeX className="w-4 h-4 text-slate-400" />
-                <span className="hidden sm:inline text-[11px]">찬양 BGM OFF</span>
-                <span className="sm:hidden text-[10px]">BGM OFF</span>
+                <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
+                <span className="hidden sm:inline text-[11px]">BGM OFF</span>
+                <span className="sm:hidden text-[9px]">OFF</span>
               </>
             )}
           </button>
         </div>
 
         {/* TOP RIGHT: TEACHER SESSION & DASHBOARD CONTROLS */}
-        <div className="pointer-events-auto bg-slate-900/90 border border-amber-500/40 rounded-2xl p-1.5 sm:p-2.5 shadow-2xl backdrop-blur-md flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2">
+        <div className="pointer-events-auto bg-slate-900/90 border border-amber-500/40 rounded-2xl p-1.5 sm:p-2.5 shadow-2xl backdrop-blur-md flex items-center justify-between sm:justify-end gap-1 sm:gap-2">
           {/* Game Status Badge */}
           <div className="flex items-center gap-1">
             <Trophy className="w-3.5 h-3.5 text-amber-400 hidden sm:block" />
@@ -846,9 +846,9 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       )}
 
       {/* VIRTUAL D-PAD TOUCH CONTROLLER FOR MOBILE SMARTPHONES */}
-      <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 z-30 flex flex-col items-center gap-1 touch-manipulation select-none">
-        <div className="bg-slate-900/90 border border-amber-500/40 text-amber-300 font-extrabold px-2 py-0.5 rounded-full text-[10px] shadow-md mb-0.5 pointer-events-none">
-          🎮 방향키로 이동
+      <div className="absolute bottom-2 left-2 sm:bottom-6 sm:left-6 z-30 flex flex-col items-center gap-0.5 sm:gap-1 touch-manipulation select-none scale-90 sm:scale-100 origin-bottom-left">
+        <div className="bg-slate-900/90 border border-amber-500/40 text-amber-300 font-extrabold px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] shadow-md mb-0.5 pointer-events-none">
+          🎮 방향키 이동
         </div>
 
         <button
@@ -857,32 +857,32 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
           onMouseDown={() => (touchDirections.current.up = true)}
           onMouseUp={() => (touchDirections.current.up = false)}
           onMouseLeave={() => (touchDirections.current.up = false)}
-          className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
+          className="w-11 h-11 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
           aria-label="위로 이동"
         >
-          <ArrowUp className="w-7 h-7 stroke-[3]" />
+          <ArrowUp className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onTouchStart={(e) => { e.preventDefault(); touchDirections.current.left = true; }}
             onTouchEnd={(e) => { e.preventDefault(); touchDirections.current.left = false; }}
             onMouseDown={() => (touchDirections.current.left = true)}
             onMouseUp={() => (touchDirections.current.left = false)}
             onMouseLeave={() => (touchDirections.current.left = false)}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
+            className="w-11 h-11 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
             aria-label="왼쪽으로 이동"
           >
-            <ArrowLeft className="w-7 h-7 stroke-[3]" />
+            <ArrowLeft className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
           </button>
 
           {/* Quick Auto-Walk Button to Next Verse */}
           <button
             onClick={handleAutoMoveToNextVerse}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 text-amber-300 active:text-slate-950 rounded-2xl flex flex-col items-center justify-center text-[10px] font-black shadow-xl transition active:scale-90 cursor-pointer"
+            className="w-11 h-11 sm:w-14 sm:h-14 bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 text-amber-300 active:text-slate-950 rounded-2xl flex flex-col items-center justify-center text-[9px] sm:text-[10px] font-black shadow-xl transition active:scale-90 cursor-pointer"
             title="다음 말씀 구절 위치로 자동 이동"
           >
-            <Compass className="w-5 h-5 mb-0.5" />
+            <Compass className="w-4 h-4 sm:w-5 sm:h-5 mb-0.5" />
             <span>워프</span>
           </button>
 
@@ -892,10 +892,10 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
             onMouseDown={() => (touchDirections.current.right = true)}
             onMouseUp={() => (touchDirections.current.right = false)}
             onMouseLeave={() => (touchDirections.current.right = false)}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
+            className="w-11 h-11 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
             aria-label="오른쪽으로 이동"
           >
-            <ArrowRight className="w-7 h-7 stroke-[3]" />
+            <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
           </button>
         </div>
 
@@ -905,25 +905,25 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
           onMouseDown={() => (touchDirections.current.down = true)}
           onMouseUp={() => (touchDirections.current.down = false)}
           onMouseLeave={() => (touchDirections.current.down = false)}
-          className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
+          className="w-11 h-11 sm:w-14 sm:h-14 bg-slate-900/95 hover:bg-amber-500/30 border-2 border-amber-400 active:bg-amber-500 active:text-slate-950 text-amber-300 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-md transition active:scale-90 cursor-pointer"
           aria-label="아래로 이동"
         >
-          <ArrowDown className="w-7 h-7 stroke-[3]" />
+          <ArrowDown className="w-6 h-6 sm:w-7 sm:h-7 stroke-[3]" />
         </button>
       </div>
 
       {/* Active Gate Quick Interaction Bar */}
       {activeGate && gameSessionStatus !== 'ENDED' && (
-        <div className="absolute bottom-16 sm:bottom-20 left-1/2 -translate-x-1/2 z-30 bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-2.5 sm:p-4 max-w-xs sm:max-w-sm w-11/12 shadow-2xl backdrop-blur-md text-white flex items-center justify-between gap-2 animate-bounce">
+        <div className="absolute bottom-14 landscape:bottom-12 sm:bottom-20 left-1/2 -translate-x-1/2 z-30 bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-2 sm:p-4 max-w-xs sm:max-w-sm w-11/12 shadow-2xl backdrop-blur-md text-white flex items-center justify-between gap-2 animate-bounce">
           <div className="min-w-0">
             <span className="text-[9px] sm:text-[10px] text-amber-400 font-extrabold uppercase tracking-wide block">
               미션 #{activeGate.id} 구절 포착!
             </span>
-            <p className="text-[11px] sm:text-xs font-bold text-amber-200 truncate">[주제: {activeGate.theme}]</p>
+            <p className="text-[10px] sm:text-xs font-bold text-amber-200 truncate">[주제: {activeGate.theme}]</p>
           </div>
           <button
             onClick={() => onOpenQuiz(activeGate!)}
-            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs shadow-lg transition shrink-0 cursor-pointer active:scale-95 flex items-center gap-1 min-h-[36px]"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-3 py-1.5 sm:px-4 sm:py-2.5 rounded-xl text-xs shadow-lg transition shrink-0 cursor-pointer active:scale-95 flex items-center gap-1 min-h-[34px]"
           >
             <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span>암송 풀기</span>
@@ -932,50 +932,50 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       )}
 
       {/* BOTTOM RIGHT: MOBILE GAME ACTION BUTTON CLUSTER */}
-      <div className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 z-30 flex items-end gap-2.5 touch-manipulation">
+      <div className="absolute bottom-2 right-2 sm:bottom-6 sm:right-6 z-30 flex items-end gap-1.5 sm:gap-2.5 touch-manipulation scale-90 sm:scale-100 origin-bottom-right">
         {/* Secondary Action Buttons (Armor & AI Tutor) */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5 sm:gap-2">
           <button
             onClick={onOpenItemInventory}
-            className="bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 text-amber-300 font-bold px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-2xl backdrop-blur-md transition cursor-pointer active:scale-90"
+            className="bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 text-amber-300 font-bold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl text-xs flex items-center gap-1 shadow-2xl backdrop-blur-md transition cursor-pointer active:scale-90"
           >
-            <Flame className="w-4 h-4 text-amber-400" />
-            <span className="text-[11px] sm:text-xs">갑주</span>
+            <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
+            <span className="text-[10px] sm:text-xs">갑주</span>
           </button>
 
           <button
             onClick={onOpenAIHelp}
-            className="bg-purple-900/90 border-2 border-purple-500/60 hover:bg-purple-600 text-white font-extrabold px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-2xl backdrop-blur-md transition cursor-pointer active:scale-90"
+            className="bg-purple-900/90 border-2 border-purple-500/60 hover:bg-purple-600 text-white font-extrabold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl text-xs flex items-center gap-1 shadow-2xl backdrop-blur-md transition cursor-pointer active:scale-90"
           >
-            <Sparkles className="w-4 h-4 text-purple-300" />
-            <span className="text-[11px] sm:text-xs">AI튜터</span>
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-300" />
+            <span className="text-[10px] sm:text-xs">AI튜터</span>
           </button>
         </div>
 
         {/* Primary Arcade Action [A] & [B] Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* B Button: Warp / Navigation */}
           <button
             onClick={handleAutoMoveToNextVerse}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-600/30 border-2 border-amber-500/80 active:bg-amber-500 text-amber-300 active:text-slate-950 rounded-full flex flex-col items-center justify-center font-black shadow-2xl backdrop-blur-md transition active:scale-90"
+            className="w-11 h-11 sm:w-14 sm:h-14 bg-amber-600/30 border-2 border-amber-500/80 active:bg-amber-500 text-amber-300 active:text-slate-950 rounded-full flex flex-col items-center justify-center font-black shadow-2xl backdrop-blur-md transition active:scale-90"
             title="다음 말씀으로 이동"
           >
-            <Compass className="w-5 h-5 mb-0.5" />
-            <span className="text-[9px]">B 워프</span>
+            <Compass className="w-4 h-4 sm:w-5 sm:h-5 mb-0.5" />
+            <span className="text-[8px] sm:text-[9px]">B 워프</span>
           </button>
 
           {/* A Button: Interact / 암송 풀기 */}
           <button
             disabled={!activeGate}
             onClick={() => activeGate && onOpenQuiz(activeGate)}
-            className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex flex-col items-center justify-center font-black shadow-2xl transition active:scale-90 ${
+            className={`w-14 h-14 sm:w-20 sm:h-20 rounded-full flex flex-col items-center justify-center font-black shadow-2xl transition active:scale-90 ${
               activeGate
                 ? 'bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 border-4 border-amber-300 shadow-amber-500/50 animate-pulse cursor-pointer'
                 : 'bg-slate-900/80 border-2 border-slate-700 text-slate-500 cursor-not-allowed opacity-60'
             }`}
           >
-            <BookOpen className="w-6 h-6 sm:w-8 sm:h-8" />
-            <span className="text-[10px] sm:text-xs font-black">A 암송</span>
+            <BookOpen className="w-5 h-5 sm:w-8 sm:h-8" />
+            <span className="text-[9px] sm:text-xs font-black">A 암송</span>
           </button>
         </div>
       </div>

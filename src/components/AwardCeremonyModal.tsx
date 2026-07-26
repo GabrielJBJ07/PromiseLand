@@ -20,6 +20,7 @@ interface AwardCeremonyModalProps {
   onClose: () => void;
   students: LeaderboardEntry[];
   onOpenCertificate: (studentName: string, grade: string) => void;
+  onOpenAllCertificates?: () => void;
   onResetGame: () => void;
 }
 
@@ -28,6 +29,7 @@ export const AwardCeremonyModal: React.FC<AwardCeremonyModalProps> = ({
   onClose,
   students,
   onOpenCertificate,
+  onOpenAllCertificates,
   onResetGame,
 }) => {
   if (!isOpen) return null;
@@ -204,15 +206,31 @@ export const AwardCeremonyModal: React.FC<AwardCeremonyModalProps> = ({
             <span>새로운 게임 활동 초기화</span>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {sorted.length > 0 && (
-              <button
-                onClick={() => onOpenCertificate(sorted[0].name, sorted[0].grade)}
-                className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-5 py-3 rounded-2xl text-xs sm:text-sm shadow-xl transition cursor-pointer active:scale-95 min-h-[44px]"
-              >
-                <Printer className="w-4 h-4" />
-                <span>우승자 수료증 출력</span>
-              </button>
+              <>
+                <button
+                  onClick={() => onOpenCertificate(sorted[0].name, sorted[0].grade)}
+                  className="flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold px-3.5 py-3 rounded-2xl text-xs sm:text-sm transition cursor-pointer active:scale-95 min-h-[44px]"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>우승자 수료증</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (onOpenAllCertificates) {
+                      onOpenAllCertificates();
+                    } else if (sorted[0]) {
+                      onOpenCertificate(sorted[0].name, sorted[0].grade);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-4 py-3 rounded-2xl text-xs sm:text-sm shadow-xl transition cursor-pointer active:scale-95 min-h-[44px]"
+                >
+                  <Printer className="w-4 h-4 text-slate-950" />
+                  <span>🎓 참가자 전원 수료증 일괄 출력 ({sorted.length}명)</span>
+                </button>
+              </>
             )}
 
             <button

@@ -41,7 +41,7 @@ export default function App() {
 
   const [activeQuizVerse, setActiveQuizVerse] = useState<BibleVerse | null>(null);
   const [rewardItem, setRewardItem] = useState<GameItem | null>(null);
-  const [certificateData, setCertificateData] = useState<{ name: string; grade: string } | null>(null);
+  const [certificateData, setCertificateData] = useState<{ name: string; grade: string; completedCount?: number; isAll?: boolean } | null>(null);
 
   // Sync player to joinedStudents roster
   useEffect(() => {
@@ -233,6 +233,10 @@ export default function App() {
           isOpen={isDashboardOpen}
           onClose={() => setIsDashboardOpen(false)}
           onOpenCertificate={(name, grade) => setCertificateData({ name, grade })}
+          onOpenAllCertificates={() => {
+            const first = joinedStudents[0] || { name: player.name, grade: player.grade, completedCount: player.completedVerseIds.length };
+            setCertificateData({ name: first.name, grade: first.grade, completedCount: first.completedCount, isAll: true });
+          }}
           joinedStudents={joinedStudents}
           onAddDemoStudent={handleAddDemoStudent}
           onRemoveStudent={handleRemoveStudent}
@@ -245,6 +249,10 @@ export default function App() {
         onClose={() => setIsAwardCeremonyOpen(false)}
         students={joinedStudents}
         onOpenCertificate={(name, grade) => setCertificateData({ name, grade })}
+        onOpenAllCertificates={() => {
+          const first = joinedStudents[0] || { name: player.name, grade: player.grade, completedCount: player.completedVerseIds.length };
+          setCertificateData({ name: first.name, grade: first.grade, completedCount: first.completedCount, isAll: true });
+        }}
         onResetGame={handleResetGameSession}
       />
 
@@ -252,9 +260,10 @@ export default function App() {
         <CertificateModal
           studentName={certificateData.name}
           grade={certificateData.grade}
-          completedCount={player?.completedVerseIds.length || 0}
+          completedCount={certificateData.completedCount ?? (player?.completedVerseIds.length || 0)}
           isOpen={!!certificateData}
           onClose={() => setCertificateData(null)}
+          allStudents={joinedStudents}
         />
       )}
 

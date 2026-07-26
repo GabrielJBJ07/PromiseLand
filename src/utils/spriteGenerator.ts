@@ -1,11 +1,11 @@
 import { CharacterPreset } from '../types';
 
 export const CHARACTER_PRESETS: CharacterPreset[] = [
-  // 남성 성경 인물 (4명)
+  // 성경 인물 프리셋
   {
     id: 'joshua',
     name: '여호수아',
-    title: '정복 대장 (남)',
+    title: '정복 대장',
     hairColor: '#4A2E1A',
     skinColor: '#F2D3B4',
     outfitColor: '#2B5797',
@@ -15,7 +15,7 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
   {
     id: 'moses',
     name: '모세',
-    title: '믿음의 인도자 (남)',
+    title: '믿음의 인도자',
     hairColor: '#E0E0E0',
     skinColor: '#E2B897',
     outfitColor: '#9C27B0',
@@ -25,7 +25,7 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
   {
     id: 'david',
     name: '다윗',
-    title: '찬양의 찬란한 왕 (남)',
+    title: '찬양의 찬란한 왕',
     hairColor: '#D97706',
     skinColor: '#F5D0A9',
     outfitColor: '#059669',
@@ -35,19 +35,17 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
   {
     id: 'paul',
     name: '바울',
-    title: '복음의 전도자 (남)',
+    title: '복음의 전도자',
     hairColor: '#78350F',
     skinColor: '#F3D5B5',
     outfitColor: '#2563EB',
     hatType: 'tunic',
     accessory: 'scroll',
   },
-
-  // 여성 성경 인물 (4명)
   {
     id: 'esther',
     name: '에스더',
-    title: '결단의 왕후 (여)',
+    title: '결단의 왕후',
     hairColor: '#1E1B18',
     skinColor: '#FCE7F3',
     outfitColor: '#DB2777',
@@ -57,7 +55,7 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
   {
     id: 'mary',
     name: '마리아',
-    title: '순종의 여종 (여)',
+    title: '순종의 여종',
     hairColor: '#312E81',
     skinColor: '#FFF1F2',
     outfitColor: '#0284C7',
@@ -67,7 +65,7 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
   {
     id: 'deborah',
     name: '드보라',
-    title: '용기의 여선지자 (여)',
+    title: '용기의 여선지자',
     hairColor: '#DC2626',
     skinColor: '#FDE047',
     outfitColor: '#7C3AED',
@@ -77,7 +75,7 @@ export const CHARACTER_PRESETS: CharacterPreset[] = [
   {
     id: 'ruth',
     name: '룻',
-    title: '신실한 순종의 여인 (여)',
+    title: '신실한 순종의 여인',
     hairColor: '#7C2D12',
     skinColor: '#FCE7F3',
     outfitColor: '#0D9488',

@@ -86,26 +86,27 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
     let chunks: string[] = [];
 
     if (difficultyTier === 1) {
-      // Easy: Group words into 3~4 phrase chunks
-      const chunkSize = Math.ceil(words.length / 3);
+      // 쉬움 난이도: 2~3개의 큰 덩어리(마디)로 구분
+      const chunkSize = Math.max(1, Math.ceil(words.length / 2.5));
       for (let i = 0; i < words.length; i += chunkSize) {
         chunks.push(words.slice(i, i + chunkSize).join(' '));
       }
     } else if (difficultyTier === 2) {
-      // Medium: Group words into 4~5 phrase chunks
-      const chunkSize = Math.ceil(words.length / 5);
+      // 중간 난이도: 3~5개의 덩어리로 구절 분할
+      const chunkSize = Math.max(1, Math.ceil(words.length / 4));
       for (let i = 0; i < words.length; i += chunkSize) {
         chunks.push(words.slice(i, i + chunkSize).join(' '));
       }
     } else {
-      // Hard: Detailed individual word/phrase scramble
-      const chunkSize = Math.max(1, Math.floor(words.length / 7));
-      for (let i = 0; i < words.length; i += chunkSize) {
-        chunks.push(words.slice(i, i + chunkSize).join(' '));
-      }
+      // 어려움 난이도: 단어별로 전부 낱개로 나눔
+      chunks = [...words];
     }
 
-    const shuffled = [...chunks].sort(() => Math.random() - 0.5);
+    let shuffled = [...chunks].sort(() => Math.random() - 0.5);
+    // 셔플 후 원래 순서와 완전히 같을 경우 재셔플
+    if (shuffled.length > 1 && shuffled.join(' ') === verse.text) {
+      shuffled = [...chunks].reverse();
+    }
     setScrambledWords(shuffled);
     setSelectedWords([]);
 

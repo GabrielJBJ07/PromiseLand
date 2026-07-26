@@ -20,6 +20,7 @@ interface DashboardProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenCertificate: (studentName: string, grade: string) => void;
+  onOpenAllCertificates?: () => void;
   joinedStudents: LeaderboardEntry[];
   onAddDemoStudent?: () => void;
   onRemoveStudent?: (studentId: string) => void;
@@ -31,6 +32,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   isOpen,
   onClose,
   onOpenCertificate,
+  onOpenAllCertificates,
   joinedStudents,
   onAddDemoStudent,
   onRemoveStudent,
@@ -122,6 +124,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {joinedStudents.length > 0 && onOpenAllCertificates && (
+              <button
+                onClick={onOpenAllCertificates}
+                className="bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 text-slate-950 font-extrabold px-3 py-1.5 rounded-xl text-xs shadow transition cursor-pointer active:scale-95 flex items-center gap-1 shrink-0"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>🎓 전원 수료증</span>
+              </button>
+            )}
+
             <button
               onClick={onOpenQRModal}
               className="bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer active:scale-95"
