@@ -155,9 +155,8 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
     if (quizTypeOverride) {
       targetConfig = QUIZ_TYPES.find((q) => q.id === quizTypeOverride) || QUIZ_TYPES[0];
     } else {
-      // Pick a random quiz type out of the 7
-      const randomIdx = Math.floor(Math.random() * QUIZ_TYPES.length);
-      targetConfig = QUIZ_TYPES[randomIdx];
+      // Default to highest difficulty (Level 7: Full Typing) on initial open
+      targetConfig = QUIZ_TYPES[0];
     }
     setSelectedQuiz(targetConfig);
 
@@ -242,10 +241,13 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
 
   if (!isOpen || !verse) return null;
 
-  // Reroll handler with score penalty increment
+  // Reroll handler: step down difficulty by 1 level sequentially (Level 7 -> 6 -> 5 -> 4 -> 3 -> 2 -> 1 -> 7)
   const handleRerollQuiz = () => {
     setRerollCount((prev) => prev + 1);
-    initializeRandomQuiz();
+    const currentIdx = QUIZ_TYPES.findIndex((q) => q.id === selectedQuiz.id);
+    const nextIdx = currentIdx !== -1 ? (currentIdx + 1) % QUIZ_TYPES.length : 0;
+    const nextType = QUIZ_TYPES[nextIdx].id;
+    initializeRandomQuiz(nextType);
   };
 
   // --- HANDLERS FOR LEVEL 7: Full Typing ---
@@ -453,9 +455,9 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
               <textarea
                 value={typedInput}
                 onChange={(e) => setTypedInput(e.target.value)}
-                placeholder={`"${verse.text}"\n\n위 성경 구절을 직접 정확히 작성하세요...`}
+                placeholder={`[${verse.reference}] 성경 구절 주소를 확인하고 암송 말씀을 직접 정확히 입력하세요...`}
                 rows={4}
-                className="w-full bg-slate-900 border-2 border-amber-500/40 focus:border-amber-400 rounded-xl p-3 text-xs sm:text-sm text-amber-100 placeholder-slate-600 focus:outline-none leading-relaxed resize-none shadow-inner"
+                className="w-full bg-slate-900 border-2 border-amber-500/40 focus:border-amber-400 rounded-xl p-3 text-xs sm:text-sm text-amber-100 placeholder-slate-500 focus:outline-none leading-relaxed resize-none shadow-inner"
               />
 
               <div className="flex items-center justify-between text-[10px] text-slate-400">

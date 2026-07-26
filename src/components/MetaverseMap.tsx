@@ -626,6 +626,17 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
 
     // 7. Draw Player Character Avatar
     const hasAura = player.equippedItems.includes('helmet_salvation');
+
+    // Ground position ring under character feet (drawn BEFORE player sprite so it stays under feet)
+    ctx.strokeStyle = '#F59E0B';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(playerPos.x, playerPos.y + 16, 18, 7, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(245, 158, 11, 0.25)';
+    ctx.fill();
+
     drawPixelSprite(
       ctx,
       player.character,
@@ -637,12 +648,7 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       hasAura
     );
 
-    // Player Name Tag & Indicator Ring
-    ctx.fillStyle = 'rgba(245, 158, 11, 0.95)';
-    ctx.beginPath();
-    ctx.arc(playerPos.x, playerPos.y + 18, 14, 0, Math.PI * 2);
-    ctx.fill();
-
+    // Player Name Tag
     ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
     ctx.beginPath();
     ctx.roundRect(playerPos.x - 45, playerPos.y - 36, 90, 16, 6);
