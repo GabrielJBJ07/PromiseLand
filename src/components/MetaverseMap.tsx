@@ -4,6 +4,7 @@ import { BIBLE_VERSES } from '../data/bibleVerses';
 import { drawPixelSprite } from '../utils/spriteGenerator';
 import { SpriteCanvas } from './SpriteCanvas';
 import promisedLandMapImg from '../assets/images/promised_land_map_1785069145605.jpg';
+import { bgmSynth } from '../utils/bgmSynth';
 import {
   BookOpen,
   Trophy,
@@ -20,6 +21,12 @@ import {
   ArrowRight,
   Flame,
   Award,
+  Music,
+  Volume2,
+  VolumeX,
+  Heart,
+  Star,
+  Zap,
 } from 'lucide-react';
 
 interface MetaverseMapProps {
@@ -230,6 +237,19 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
   });
 
   // Canvas Touch / Mouse Drag Movement Handler
+  const [isBgmPlaying, setIsBgmPlaying] = useState(false);
+
+  useEffect(() => {
+    const unsub = bgmSynth.subscribe((playing) => {
+      setIsBgmPlaying(playing);
+    });
+    return unsub;
+  }, []);
+
+  const handleToggleBgm = () => {
+    bgmSynth.toggleBGM();
+  };
+
   const handleCanvasTouchStartOrMove = (e: React.TouchEvent<HTMLCanvasElement> | React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -274,6 +294,7 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
 
   // Helper to walk automatically to next verse mission
   const handleAutoMoveToNextVerse = () => {
+    bgmSynth.playWarpSound();
     const completedIds = player.completedVerseIds;
     const nextVerseId = completedIds.length + 1;
     const nextTarget = pathWaypoints[Math.min(35, nextVerseId - 1)];
@@ -384,6 +405,7 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       }
 
       if (entity.type === 'fruit' && !entity.collected && dist < 38) {
+        bgmSynth.playChime();
         setEntities((prev) =>
           prev.map((e) => (e.id === entity.id ? { ...e, collected: true } : e))
         );
@@ -651,99 +673,158 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
         className="block w-full h-full cursor-grab active:cursor-grabbing"
       />
 
-      {/* TEACHER TOP CONTROL BAR (교사 제어 및 학생 모니터링 바) */}
-      <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-4 z-30 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 bg-slate-900/90 border border-amber-500/40 rounded-2xl p-2 sm:p-3 shadow-2xl backdrop-blur-md max-w-full">
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          <div className="bg-amber-500/20 text-amber-400 p-1.5 sm:p-2 rounded-xl border border-amber-500/30">
-            <Trophy className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+      {/* MOBILE GAME TOP HUD & CONTROL BAR */}
+      <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-4 z-30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pointer-events-none">
+        
+        {/* TOP LEFT: MOBILE PLAYER PROFILE & FAITH STATS CARD */}
+        <div className="pointer-events-auto bg-slate-900/95 border-2 border-amber-500/50 rounded-2xl p-2 sm:p-2.5 shadow-2xl backdrop-blur-md flex items-center justify-between sm:justify-start gap-2 sm:gap-3 max-w-full">
+          {/* Avatar Thumbnail */}
+          <div className="relative shrink-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-slate-950 border-2 border-amber-400 rounded-xl overflow-hidden flex items-center justify-center shadow-inner">
+              <SpriteCanvas
+                config={player.character}
+                width={36}
+                height={36}
+                direction="down"
+              />
+            </div>
+            {/* Level Badge */}
+            <span className="absolute -bottom-1 -right-1 bg-amber-500 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-md border border-slate-900 shadow">
+              Lv.{Math.floor(player.completedVerseIds.length / 3) + 1}
+            </span>
           </div>
 
-          <div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-extrabold text-[11px] sm:text-sm text-amber-300">
-                약속의 땅 말씀 메타버스
+          {/* Name & Stats */}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="font-extrabold text-xs sm:text-sm text-white truncate max-w-[90px] sm:max-w-[120px]">
+                {player.name}
               </span>
-              <span
-                className={`text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md ${
-                  gameSessionStatus === 'WAITING'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
-                    : gameSessionStatus === 'PLAYING'
-                    ? 'bg-emerald-500 text-slate-950'
-                    : 'bg-purple-600 text-white'
-                }`}
-              >
-                {gameSessionStatus === 'WAITING'
-                  ? '⏳ 대기'
-                  : gameSessionStatus === 'PLAYING'
-                  ? '🟢 진행중'
-                  : '🏆 종료됨'}
+              <span className="text-[9px] font-bold px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded">
+                {player.grade}
               </span>
             </div>
 
-            <p className="text-[10px] text-slate-300 hidden md:block mt-0.5">
-              QR 코드로 학생들을 초대하고 실시간 이동과 말씀 암송 미션 진도를 관찰하세요!
-            </p>
+            {/* Hearts & Score */}
+            <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-0.5 text-rose-400">
+                <Heart className="w-3 h-3 fill-current animate-pulse" />
+                <Heart className="w-3 h-3 fill-current" />
+                <Heart className="w-3 h-3 fill-current" />
+              </div>
+
+              <div className="flex items-center gap-1 text-amber-300 text-[10px] sm:text-xs font-black">
+                <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                <span>{player.score}P</span>
+              </div>
+
+              <div className="text-[10px] text-emerald-400 font-bold ml-1">
+                {player.completedVerseIds.length}/36 완송
+              </div>
+            </div>
           </div>
+
+          {/* PRAISE BGM AUDIO TOGGLE BUTTON */}
+          <button
+            onClick={handleToggleBgm}
+            className={`pointer-events-auto shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black transition cursor-pointer active:scale-95 border shadow-lg ${
+              isBgmPlaying
+                ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-emerald-500/30'
+                : 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-amber-500/40'
+            }`}
+            title="어린이 찬양 배경음악 켜기/끄기"
+          >
+            {isBgmPlaying ? (
+              <>
+                <Volume2 className="w-4 h-4 animate-bounce text-slate-950" />
+                <span className="hidden sm:inline text-[11px]">찬양 BGM ON</span>
+                <span className="sm:hidden text-[10px]">BGM ON</span>
+              </>
+            ) : (
+              <>
+                <VolumeX className="w-4 h-4 text-slate-400" />
+                <span className="hidden sm:inline text-[11px]">찬양 BGM OFF</span>
+                <span className="sm:hidden text-[10px]">BGM OFF</span>
+              </>
+            )}
+          </button>
         </div>
 
-        {/* Teacher Game Session Controls */}
-        <div className="flex items-center gap-1 sm:gap-2">
-          {/* Invite Students QR */}
-          <button
-            onClick={onOpenQRModal}
-            className="flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-[11px] sm:text-xs shadow-md transition cursor-pointer active:scale-95"
-          >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>QR</span>
-          </button>
-
-          {/* Joined Count */}
-          <div className="bg-slate-950 border border-slate-800 text-slate-300 px-2 py-1 rounded-xl text-[11px] sm:text-xs font-bold flex items-center gap-1">
-            <Users className="w-3.5 h-3.5 text-emerald-400" />
-            <span>{joinedStudents.length}명</span>
+        {/* TOP RIGHT: TEACHER SESSION & DASHBOARD CONTROLS */}
+        <div className="pointer-events-auto bg-slate-900/90 border border-amber-500/40 rounded-2xl p-1.5 sm:p-2.5 shadow-2xl backdrop-blur-md flex items-center justify-between sm:justify-end gap-1.5 sm:gap-2">
+          {/* Game Status Badge */}
+          <div className="flex items-center gap-1">
+            <Trophy className="w-3.5 h-3.5 text-amber-400 hidden sm:block" />
+            <span
+              className={`text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                gameSessionStatus === 'WAITING'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
+                  : gameSessionStatus === 'PLAYING'
+                  ? 'bg-emerald-500 text-slate-950'
+                  : 'bg-purple-600 text-white'
+              }`}
+            >
+              {gameSessionStatus === 'WAITING'
+                ? '⏳ 대기'
+                : gameSessionStatus === 'PLAYING'
+                ? '🟢 진행중'
+                : '🏆 종료됨'}
+            </span>
           </div>
 
-          {/* Start Button */}
-          {gameSessionStatus === 'WAITING' && (
+          {/* Teacher Game Session Controls */}
+          <div className="flex items-center gap-1 sm:gap-1.5">
             <button
-              onClick={onStartGameSession}
-              className="flex items-center gap-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs shadow-lg transition cursor-pointer active:scale-95 animate-bounce"
+              onClick={onOpenQRModal}
+              className="flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2 py-1 rounded-xl text-[10px] sm:text-xs shadow-md transition cursor-pointer active:scale-95"
             >
-              <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
-              <span>시작</span>
+              <QrCode className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span>QR</span>
             </button>
-          )}
 
-          {/* End Button */}
-          {gameSessionStatus === 'PLAYING' && (
+            <div className="bg-slate-950 border border-slate-800 text-slate-300 px-2 py-1 rounded-xl text-[10px] sm:text-xs font-bold flex items-center gap-1">
+              <Users className="w-3 h-3 text-emerald-400" />
+              <span>{joinedStudents.length}명</span>
+            </div>
+
+            {gameSessionStatus === 'WAITING' && (
+              <button
+                onClick={onStartGameSession}
+                className="flex items-center gap-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-2.5 py-1 rounded-xl text-[10px] sm:text-xs shadow-lg transition cursor-pointer active:scale-95 animate-bounce"
+              >
+                <Play className="w-3 h-3 fill-current" />
+                <span>시작</span>
+              </button>
+            )}
+
+            {gameSessionStatus === 'PLAYING' && (
+              <button
+                onClick={onEndGameSession}
+                className="flex items-center gap-1 bg-rose-600 hover:bg-rose-500 text-white font-black px-2.5 py-1 rounded-xl text-[10px] sm:text-xs shadow-lg transition cursor-pointer active:scale-95"
+              >
+                <Square className="w-3 h-3 fill-current" />
+                <span>종료</span>
+              </button>
+            )}
+
+            {gameSessionStatus === 'ENDED' && (
+              <button
+                onClick={onOpenAwardCeremony}
+                className="flex items-center gap-1 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black px-2.5 py-1 rounded-xl text-[10px] sm:text-xs shadow-lg transition cursor-pointer active:scale-95"
+              >
+                <Award className="w-3 h-3" />
+                <span>시상식</span>
+              </button>
+            )}
+
             <button
-              onClick={onEndGameSession}
-              className="flex items-center gap-1 bg-rose-600 hover:bg-rose-500 text-white font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs shadow-lg transition cursor-pointer active:scale-95"
+              onClick={onOpenDashboard}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-1.5 rounded-xl border border-slate-700 transition cursor-pointer active:scale-95 shrink-0"
+              title="실시간 현황 대시보드"
             >
-              <Square className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
-              <span>종료</span>
+              <BarChart2 className="w-3.5 h-3.5" />
             </button>
-          )}
-
-          {/* Award Ceremony Button */}
-          {gameSessionStatus === 'ENDED' && (
-            <button
-              onClick={onOpenAwardCeremony}
-              className="flex items-center gap-1 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black px-2.5 py-1 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs shadow-lg transition cursor-pointer active:scale-95"
-            >
-              <Award className="w-3.5 h-3.5" />
-              <span>시상식</span>
-            </button>
-          )}
-
-          {/* Dashboard Button */}
-          <button
-            onClick={onOpenDashboard}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-1.5 sm:p-2 rounded-xl border border-slate-700 transition cursor-pointer active:scale-95 shrink-0"
-            title="실시간 현황 대시보드"
-          >
-            <BarChart2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </button>
+          </div>
         </div>
       </div>
 
@@ -829,7 +910,7 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
             <span className="text-[9px] sm:text-[10px] text-amber-400 font-extrabold uppercase tracking-wide block">
               미션 #{activeGate.id} 구절 포착!
             </span>
-            <p className="text-[11px] sm:text-xs font-bold text-amber-200 truncate">[{activeGate.reference}]</p>
+            <p className="text-[11px] sm:text-xs font-bold text-amber-200 truncate">[주제: {activeGate.theme}]</p>
           </div>
           <button
             onClick={() => onOpenQuiz(activeGate!)}
@@ -841,23 +922,53 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
         </div>
       )}
 
-      {/* Bottom Floating Quick Actions Bar */}
-      <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-30 flex items-center gap-1.5 sm:gap-2">
-        <button
-          onClick={onOpenItemInventory}
-          className="bg-slate-900/90 border border-slate-700 hover:border-amber-400 text-amber-300 font-bold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl text-xs flex items-center gap-1 shadow-xl transition cursor-pointer active:scale-95"
-        >
-          <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
-          <span className="text-[11px] sm:text-xs">전신갑주</span>
-        </button>
+      {/* BOTTOM RIGHT: MOBILE GAME ACTION BUTTON CLUSTER */}
+      <div className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 z-30 flex items-end gap-2.5 touch-manipulation">
+        {/* Secondary Action Buttons (Armor & AI Tutor) */}
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={onOpenItemInventory}
+            className="bg-slate-900/90 border-2 border-slate-700 hover:border-amber-400 text-amber-300 font-bold px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-2xl backdrop-blur-md transition cursor-pointer active:scale-90"
+          >
+            <Flame className="w-4 h-4 text-amber-400" />
+            <span className="text-[11px] sm:text-xs">갑주</span>
+          </button>
 
-        <button
-          onClick={onOpenAIHelp}
-          className="bg-purple-600 hover:bg-purple-500 text-white font-extrabold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-2xl text-xs flex items-center gap-1 shadow-xl transition cursor-pointer active:scale-95"
-        >
-          <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span className="text-[11px] sm:text-xs">AI 튜터</span>
-        </button>
+          <button
+            onClick={onOpenAIHelp}
+            className="bg-purple-900/90 border-2 border-purple-500/60 hover:bg-purple-600 text-white font-extrabold px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-2xl backdrop-blur-md transition cursor-pointer active:scale-90"
+          >
+            <Sparkles className="w-4 h-4 text-purple-300" />
+            <span className="text-[11px] sm:text-xs">AI튜터</span>
+          </button>
+        </div>
+
+        {/* Primary Arcade Action [A] & [B] Buttons */}
+        <div className="flex items-center gap-2">
+          {/* B Button: Warp / Navigation */}
+          <button
+            onClick={handleAutoMoveToNextVerse}
+            className="w-12 h-12 sm:w-14 sm:h-14 bg-amber-600/30 border-2 border-amber-500/80 active:bg-amber-500 text-amber-300 active:text-slate-950 rounded-full flex flex-col items-center justify-center font-black shadow-2xl backdrop-blur-md transition active:scale-90"
+            title="다음 말씀으로 이동"
+          >
+            <Compass className="w-5 h-5 mb-0.5" />
+            <span className="text-[9px]">B 워프</span>
+          </button>
+
+          {/* A Button: Interact / 암송 풀기 */}
+          <button
+            disabled={!activeGate}
+            onClick={() => activeGate && onOpenQuiz(activeGate)}
+            className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex flex-col items-center justify-center font-black shadow-2xl transition active:scale-90 ${
+              activeGate
+                ? 'bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 border-4 border-amber-300 shadow-amber-500/50 animate-pulse cursor-pointer'
+                : 'bg-slate-900/80 border-2 border-slate-700 text-slate-500 cursor-not-allowed opacity-60'
+            }`}
+          >
+            <BookOpen className="w-6 h-6 sm:w-8 sm:h-8" />
+            <span className="text-[10px] sm:text-xs font-black">A 암송</span>
+          </button>
+        </div>
       </div>
     </div>
   );

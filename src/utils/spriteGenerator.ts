@@ -144,7 +144,13 @@ export function drawPixelSprite(
     );
   };
 
-  const { skinColor, hairColor, outfitColor, hatType, accessory } = preset;
+  const safePreset = preset || CHARACTER_PRESETS[0];
+  const defaultPreset = CHARACTER_PRESETS[0];
+  const skinColor = safePreset.skinColor || defaultPreset.skinColor;
+  const hairColor = safePreset.hairColor || defaultPreset.hairColor;
+  const outfitColor = safePreset.outfitColor || defaultPreset.outfitColor;
+  const hatType = safePreset.hatType || defaultPreset.hatType;
+  const accessory = safePreset.accessory || defaultPreset.accessory;
 
   // Body & Clothes (grid: 16x16)
   // Legs/Shoes

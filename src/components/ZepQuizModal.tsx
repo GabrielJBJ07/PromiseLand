@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BibleVerse, QuizType } from '../types';
 import { BIBLE_VERSES } from '../data/bibleVerses';
 import confetti from 'canvas-confetti';
+import { bgmSynth } from '../utils/bgmSynth';
 import {
   X,
   RefreshCw,
@@ -184,6 +185,7 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
 
   // Handle Success Flow
   const handleSuccess = () => {
+    bgmSynth.playFanfare();
     setIsCorrect(true);
     setFeedbackMsg(`🎉 정답입니다! 말씀 암송 완료! (+${pointsReward}점 획득)`);
 
@@ -228,7 +230,9 @@ export const ZepQuizModal: React.FC<ZepQuizModalProps> = ({
                 <span className="text-[11px] sm:text-xs text-amber-400 font-bold">미션 #{stationNum}</span>
               </div>
               <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-amber-300 mt-0.5">
-                [{verse.reference}] 암송 테스트
+                {selectedQuiz.id === 'reference_match'
+                  ? `[주제: ${verse.theme}] 암송 테스트`
+                  : `[${verse.reference}] 암송 테스트`}
               </h2>
             </div>
           </div>
