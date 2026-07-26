@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PlayerStats, BibleVerse, GameItem } from './types';
+import { PlayerStats, BibleVerse, GameItem, LeaderboardEntry, Grade } from './types';
 import { CharacterCreator } from './components/CharacterCreator';
 import { MetaverseMap } from './components/MetaverseMap';
 import { ZepQuizModal } from './components/ZepQuizModal';
@@ -8,12 +8,13 @@ import { ItemRewardModal } from './components/ItemRewardModal';
 import { ItemInventoryModal } from './components/ItemInventoryModal';
 import { Dashboard } from './components/Dashboard';
 import { CertificateModal } from './components/CertificateModal';
+import { AwardCeremonyModal } from './components/AwardCeremonyModal';
 import { AIBibleTutor } from './components/AIBibleTutor';
 import { GAME_ITEMS } from './data/items';
+import { CHARACTER_PRESETS } from './utils/spriteGenerator';
 
 export default function App() {
   const [player, setPlayer] = useState<PlayerStats | null>(() => {
-    // Load from local storage if existing
     const saved = localStorage.getItem('promised_land_player');
     if (saved) {
       try {
@@ -25,32 +26,105 @@ export default function App() {
     return null;
   });
 
+  // Game Session Status controlled by Teacher
+  const [gameSessionStatus, setGameSessionStatus] = useState<'WAITING' | 'PLAYING' | 'ENDED'>('WAITING');
+  
+  // Joined students list (Initially empty per user directive: "미리 참여해 있는 학생이 없도록 해줘")
+  const [joinedStudents, setJoinedStudents] = useState<LeaderboardEntry[]>([]);
+
   // Modal states
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [isAIHelpOpen, setIsAIHelpOpen] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+  const [isAwardCeremonyOpen, setIsAwardCeremonyOpen] = useState(false);
 
   const [activeQuizVerse, setActiveQuizVerse] = useState<BibleVerse | null>(null);
   const [rewardItem, setRewardItem] = useState<GameItem | null>(null);
   const [certificateData, setCertificateData] = useState<{ name: string; grade: string } | null>(null);
 
-  // Save player state to localStorage
+  // Sync player to joinedStudents roster
   useEffect(() => {
-    if (player) {
-      localStorage.setItem('promised_land_player', JSON.stringify(player));
-    }
+    if (!player) return;
+
+    setJoinedStudents((prev) => {
+      const exists = prev.some((s) => s.id === player.id);
+      const playerEntry: LeaderboardEntry = {
+        rank: 1,
+        id: player.id,
+        name: player.name,
+        grade: player.grade,
+        characterName: player.character.name,
+        completedCount: player.completedVerseIds.length,
+        score: player.score,
+        streak: player.streak,
+        equippedItemCount: player.equippedItems.length,
+        avatarConfig: player.character,
+      };
+
+      if (!exists) {
+        return [...prev, playerEntry];
+      } else {
+        return prev.map((s) => (s.id === player.id ? playerEntry : s));
+      }
+    });
+
+    localStorage.setItem('promised_land_player', JSON.stringify(player));
   }, [player]);
 
   const handleStartGame = (newPlayer: PlayerStats) => {
     setPlayer(newPlayer);
   };
 
+  // Teacher Game Session Handlers
+  const handleStartGameSession = () => {
+    setGameSessionStatus('PLAYING');
+  };
+
+  const handleEndGameSession = () => {
+    setGameSessionStatus('ENDED');
+    setIsAwardCeremonyOpen(true);
+  };
+
+  const handleResetGameSession = () => {
+    setGameSessionStatus('WAITING');
+    setIsAwardCeremonyOpen(false);
+  };
+
+  // Teacher Helper to add simulation student for testing QR/Roster feature
+  const handleAddDemoStudent = () => {
+    const demoNames = ['박여호수아', '김믿음', '이신앙', '최소망', '한사랑', '강주은', '임하준', '윤다은'];
+    const demoGrades: Grade[] = ['4학년', '5학년', '6학년'];
+    const idx = joinedStudents.length;
+
+    const name = demoNames[idx % demoNames.length] + ` (${idx + 1})`;
+    const grade = demoGrades[idx % demoGrades.length];
+    const preset = CHARACTER_PRESETS[idx % CHARACTER_PRESETS.length];
+
+    const newStudent: LeaderboardEntry = {
+      rank: idx + 1,
+      id: `sim_student_${Date.now()}_${idx}`,
+      name,
+      grade,
+      characterName: preset.name,
+      completedCount: Math.min(36, Math.floor(Math.random() * 15) + 3),
+      score: Math.floor(Math.random() * 2500) + 500,
+      streak: Math.floor(Math.random() * 7) + 1,
+      equippedItemCount: Math.floor(Math.random() * 3),
+      avatarConfig: preset,
+    };
+
+    setJoinedStudents((prev) => [...prev, newStudent]);
+  };
+
+  const handleRemoveStudent = (studentId: string) => {
+    setJoinedStudents((prev) => prev.filter((s) => s.id !== studentId));
+  };
+
   const handleCompleteVerse = (verseId: number, earnedPoints: number) => {
     if (!player) return;
 
     if (player.completedVerseIds.includes(verseId)) {
-      // Verse already completed previously, just add points
       setPlayer((prev) => (prev ? { ...prev, score: prev.score + earnedPoints } : prev));
       return;
     }
@@ -60,7 +134,6 @@ export default function App() {
     const newScore = player.score + earnedPoints + player.streak * 20;
     const newStreak = player.streak + 1;
 
-    // Check if 5-verse milestone item is unlocked!
     const milestoneItem = GAME_ITEMS.find((item) => item.milestoneVerseCount === newCount);
 
     setPlayer((prev) => {
@@ -109,9 +182,15 @@ export default function App() {
           onOpenQRModal={() => setIsQRModalOpen(true)}
         />
       ) : (
-        /* 2. Main Metaverse Map Gameplay */
+        /* 2. Main Metaverse Map Gameplay with Teacher Live Monitoring */
         <MetaverseMap
           player={player}
+          joinedStudents={joinedStudents}
+          gameSessionStatus={gameSessionStatus}
+          onStartGameSession={handleStartGameSession}
+          onEndGameSession={handleEndGameSession}
+          onOpenAwardCeremony={() => setIsAwardCeremonyOpen(true)}
+          onOpenQRModal={() => setIsQRModalOpen(true)}
           onOpenQuiz={(verse) => setActiveQuizVerse(verse)}
           onOpenDashboard={() => setIsDashboardOpen(true)}
           onOpenAIHelp={() => setIsAIHelpOpen(true)}
@@ -154,14 +233,26 @@ export default function App() {
           isOpen={isDashboardOpen}
           onClose={() => setIsDashboardOpen(false)}
           onOpenCertificate={(name, grade) => setCertificateData({ name, grade })}
+          joinedStudents={joinedStudents}
+          onAddDemoStudent={handleAddDemoStudent}
+          onRemoveStudent={handleRemoveStudent}
+          onOpenQRModal={() => setIsQRModalOpen(true)}
         />
       )}
 
-      {certificateData && player && (
+      <AwardCeremonyModal
+        isOpen={isAwardCeremonyOpen}
+        onClose={() => setIsAwardCeremonyOpen(false)}
+        students={joinedStudents}
+        onOpenCertificate={(name, grade) => setCertificateData({ name, grade })}
+        onResetGame={handleResetGameSession}
+      />
+
+      {certificateData && (
         <CertificateModal
           studentName={certificateData.name}
           grade={certificateData.grade}
-          completedCount={player.completedVerseIds.length}
+          completedCount={player?.completedVerseIds.length || 0}
           isOpen={!!certificateData}
           onClose={() => setCertificateData(null)}
         />

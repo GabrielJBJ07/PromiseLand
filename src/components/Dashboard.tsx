@@ -2,20 +2,17 @@ import React, { useState } from 'react';
 import { PlayerStats, LeaderboardEntry } from '../types';
 import { BIBLE_VERSES } from '../data/bibleVerses';
 import { SpriteCanvas } from './SpriteCanvas';
-import { CHARACTER_PRESETS } from '../utils/spriteGenerator';
 import {
   Trophy,
-  Award,
   Users,
   CheckCircle2,
   X,
   Printer,
-  Sparkles,
   BarChart2,
-  ChevronRight,
-  BookOpen,
   Trash2,
   AlertTriangle,
+  UserPlus,
+  QrCode,
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -23,6 +20,10 @@ interface DashboardProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenCertificate: (studentName: string, grade: string) => void;
+  joinedStudents: LeaderboardEntry[];
+  onAddDemoStudent?: () => void;
+  onRemoveStudent?: (studentId: string) => void;
+  onOpenQRModal: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
@@ -30,109 +31,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
   isOpen,
   onClose,
   onOpenCertificate,
+  joinedStudents,
+  onAddDemoStudent,
+  onRemoveStudent,
+  onOpenQRModal,
 }) => {
   const [activeTab, setActiveTab] = useState<'leaderboard' | 'teacher_admin' | 'verse_matrix'>('leaderboard');
   const [selectedGradeFilter, setSelectedGradeFilter] = useState<string>('전체');
   const [selectedStudentForMatrix, setSelectedStudentForMatrix] = useState<LeaderboardEntry | null>(null);
   const [studentToDelete, setStudentToDelete] = useState<LeaderboardEntry | null>(null);
 
-  // Simulated Leaderboard & Roster Data
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() => {
-    const list: LeaderboardEntry[] = [
-      {
-        rank: 1,
-        id: player.id,
-        name: player.name,
-        grade: player.grade,
-        characterName: player.character.name,
-        completedCount: player.completedVerseIds.length,
-        score: player.score,
-        streak: player.streak,
-        equippedItemCount: player.equippedItems.length,
-        avatarConfig: player.character,
-      },
-      {
-        rank: 2,
-        id: 'p2',
-        name: '박여호수아',
-        grade: '6학년',
-        characterName: '여호수아',
-        completedCount: 28,
-        score: 4200,
-        streak: 12,
-        equippedItemCount: 5,
-        avatarConfig: CHARACTER_PRESETS[0],
-      },
-      {
-        rank: 3,
-        id: 'p3',
-        name: '김믿음',
-        grade: '5학년',
-        characterName: '다윗',
-        completedCount: 24,
-        score: 3600,
-        streak: 8,
-        equippedItemCount: 4,
-        avatarConfig: CHARACTER_PRESETS[2],
-      },
-      {
-        rank: 4,
-        id: 'p4',
-        name: '이신앙',
-        grade: '4학년',
-        characterName: '에스더',
-        completedCount: 20,
-        score: 3100,
-        streak: 6,
-        equippedItemCount: 3,
-        avatarConfig: CHARACTER_PRESETS[1],
-      },
-      {
-        rank: 5,
-        id: 'p5',
-        name: '최소망',
-        grade: '5학년',
-        characterName: '사무엘',
-        completedCount: 16,
-        score: 2400,
-        streak: 4,
-        equippedItemCount: 2,
-        avatarConfig: CHARACTER_PRESETS[3],
-      },
-      {
-        rank: 6,
-        id: 'p6',
-        name: '한사랑',
-        grade: '4학년',
-        characterName: '다니엘',
-        completedCount: 12,
-        score: 1800,
-        streak: 3,
-        equippedItemCount: 2,
-        avatarConfig: CHARACTER_PRESETS[4],
-      },
-    ];
+  // Compute leaderboard with ranks
+  const sortedLeaderboard = [...joinedStudents]
+    .sort((a, b) => b.completedCount - a.completedCount || b.score - a.score)
+    .map((item, idx) => ({ ...item, rank: idx + 1 }));
 
-    // Sort by completed count & score
-    list.sort((a, b) => b.completedCount - a.completedCount || b.score - a.score);
-
-    // Re-assign ranks
-    return list.map((item, idx) => ({ ...item, rank: idx + 1 }));
-  });
-
-  // Handle student deletion in Teacher Admin mode
-  const handleDeleteStudent = (studentId: string) => {
-    setLeaderboard((prev) => {
-      const updated = prev.filter((s) => s.id !== studentId);
-      return updated.map((item, idx) => ({ ...item, rank: idx + 1 }));
-    });
-    setStudentToDelete(null);
-    if (selectedStudentForMatrix?.id === studentId) {
-      setSelectedStudentForMatrix(null);
-    }
-  };
-
-  const filteredLeaderboard = leaderboard.filter((item) => {
+  const filteredLeaderboard = sortedLeaderboard.filter((item) => {
     if (selectedGradeFilter === '전체') return true;
     return item.grade === selectedGradeFilter;
   });
@@ -150,10 +64,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <div>
               <h2 className="text-base sm:text-xl md:text-2xl font-extrabold text-amber-300">
-                암송 현황 & 순위 대시보드
+                암송 현황 & 실시간 대시보드
               </h2>
               <p className="text-[10px] sm:text-xs text-slate-400 hidden sm:block">
-                약속의 땅으로 향하는 학생들의 36구절 암송 달성도와 순위입니다.
+                스마트폰 QR 접속으로 참가한 학생들의 36구절 암송 진도 현황입니다. (현재 {joinedStudents.length}명 참여 중)
               </p>
             </div>
           </div>
@@ -168,207 +82,254 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Dashboard Navigation Tabs */}
-        <div className="flex items-center gap-1.5 sm:gap-2 mb-4 border-b border-slate-800 pb-2 overflow-x-auto shrink-0">
-          <button
-            onClick={() => setActiveTab('leaderboard')}
-            className={`px-3 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 ${
-              activeTab === 'leaderboard'
-                ? 'bg-amber-500 text-slate-950 shadow-md'
-                : 'bg-slate-950 text-slate-400 hover:text-white'
-            }`}
-          >
-            <Trophy className="w-3.5 h-3.5" />
-            <span>실시간 학생 순위표</span>
-          </button>
+        <div className="flex items-center justify-between gap-2 mb-4 border-b border-slate-800 pb-2 overflow-x-auto shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={() => setActiveTab('leaderboard')}
+              className={`px-3 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 ${
+                activeTab === 'leaderboard'
+                  ? 'bg-amber-500 text-slate-950 shadow-md'
+                  : 'bg-slate-950 text-slate-400 hover:text-white'
+              }`}
+            >
+              <Trophy className="w-3.5 h-3.5" />
+              <span>실시간 학생 순위표</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('teacher_admin')}
-            className={`px-3 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 ${
-              activeTab === 'teacher_admin'
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'bg-slate-950 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>🏫 교사 전용 관리</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('teacher_admin')}
+              className={`px-3 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 ${
+                activeTab === 'teacher_admin'
+                  ? 'bg-emerald-500 text-slate-950 shadow-md'
+                  : 'bg-slate-950 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span>🏫 교사 전용 관리</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('verse_matrix')}
-            className={`px-3 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 ${
-              activeTab === 'verse_matrix'
-                ? 'bg-amber-500 text-slate-950 shadow-md'
-                : 'bg-slate-950 text-slate-400 hover:text-white'
-            }`}
-          >
-            <BarChart2 className="w-3.5 h-3.5" />
-            <span>36구절 암송 현황표</span>
-          </button>
+            <button
+              onClick={() => setActiveTab('verse_matrix')}
+              className={`px-3 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-95 ${
+                activeTab === 'verse_matrix'
+                  ? 'bg-amber-500 text-slate-950 shadow-md'
+                  : 'bg-slate-950 text-slate-400 hover:text-white'
+              }`}
+            >
+              <BarChart2 className="w-3.5 h-3.5" />
+              <span>36구절 암송 현황표</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onOpenQRModal}
+              className="bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer active:scale-95"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span>학생 초대 QR</span>
+            </button>
+          </div>
         </div>
 
         {/* TAB 1: REALTIME LEADERBOARD */}
         {activeTab === 'leaderboard' && (
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
             {/* Grade Filters */}
-            <div className="flex items-center gap-1.5 sm:gap-2 mb-3 flex-wrap">
-              <span className="text-xs font-bold text-slate-300">학년 필터:</span>
-              {['전체', '4학년', '5학년', '6학년'].map((g) => (
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-3 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-slate-300">학년 필터:</span>
+                {['전체', '4학년', '5학년', '6학년'].map((g) => (
+                  <button
+                    key={g}
+                    onClick={() => setSelectedGradeFilter(g)}
+                    className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
+                      selectedGradeFilter === g
+                        ? 'bg-amber-500 text-slate-950 font-extrabold shadow-md'
+                        : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    }`}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+
+              {onAddDemoStudent && (
                 <button
-                  key={g}
-                  onClick={() => setSelectedGradeFilter(g)}
-                  className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold transition cursor-pointer active:scale-95 ${
-                    selectedGradeFilter === g
-                      ? 'bg-amber-500 text-slate-950 font-extrabold shadow-md'
-                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
-                  }`}
+                  onClick={onAddDemoStudent}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold px-2.5 py-1 rounded-lg border border-slate-700 flex items-center gap-1 transition cursor-pointer active:scale-95"
                 >
-                  {g}
+                  <UserPlus className="w-3 h-3 text-emerald-400" />
+                  <span>시뮬레이션 학생 추가</span>
                 </button>
-              ))}
+              )}
             </div>
 
             {/* Leaderboard Items */}
-            <div className="space-y-2">
-              {filteredLeaderboard.map((item) => {
-                const isMe = item.id === player.id;
+            {filteredLeaderboard.length > 0 ? (
+              <div className="space-y-2">
+                {filteredLeaderboard.map((item) => {
+                  const isMe = item.id === player.id;
 
-                return (
-                  <div
-                    key={item.id}
-                    className={`flex items-center justify-between p-3 sm:p-4 rounded-2xl border transition ${
-                      isMe
-                        ? 'bg-amber-500/10 border-amber-500/60 shadow-lg'
-                        : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      {/* Rank Badge */}
-                      <div
-                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center font-black text-xs sm:text-sm shrink-0 ${
-                          item.rank === 1
-                            ? 'bg-amber-500 text-slate-950'
-                            : item.rank === 2
-                            ? 'bg-slate-300 text-slate-950'
-                            : item.rank === 3
-                            ? 'bg-amber-700 text-white'
-                            : 'bg-slate-800 text-slate-400'
-                        }`}
-                      >
-                        {item.rank}위
-                      </div>
+                  return (
+                    <div
+                      key={item.id}
+                      className={`flex items-center justify-between p-3 sm:p-4 rounded-2xl border transition ${
+                        isMe
+                          ? 'bg-amber-500/10 border-amber-500/60 shadow-lg'
+                          : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* Rank Badge */}
+                        <div
+                          className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center font-black text-xs sm:text-sm shrink-0 ${
+                            item.rank === 1
+                              ? 'bg-amber-500 text-slate-950'
+                              : item.rank === 2
+                              ? 'bg-slate-300 text-slate-950'
+                              : item.rank === 3
+                              ? 'bg-amber-700 text-white'
+                              : 'bg-slate-800 text-slate-400'
+                          }`}
+                        >
+                          {item.rank}위
+                        </div>
 
-                      {/* Avatar */}
-                      <div className="shrink-0">
-                        <SpriteCanvas preset={item.avatarConfig} size={32} animated={false} />
-                      </div>
+                        {/* Avatar */}
+                        <div className="shrink-0">
+                          <SpriteCanvas preset={item.avatarConfig} size={32} animated={false} />
+                        </div>
 
-                      {/* Info */}
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-extrabold text-sm text-white">{item.name}</span>
-                          <span className="bg-slate-800 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-slate-700">
-                            {item.grade}
-                          </span>
-                          {isMe && (
-                            <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-md">
-                              나
+                        {/* Info */}
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-extrabold text-sm text-white">{item.name}</span>
+                            <span className="bg-slate-800 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-slate-700">
+                              {item.grade}
                             </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
-                          <span>캐릭터: {item.characterName}</span>
-                          <span>•</span>
-                          <span>연속 {item.streak}일</span>
+                            {isMe && (
+                              <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-md">
+                                나
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
+                            <span>캐릭터: {item.characterName}</span>
+                            <span>•</span>
+                            <span>연속 {item.streak}일</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Progress Stats */}
-                    <div className="text-right">
-                      <div className="text-amber-300 font-extrabold text-xs sm:text-sm">
-                        암송 {item.completedCount}/36 구절
-                      </div>
-                      <div className="text-[11px] text-slate-400 font-bold mt-0.5">
-                        {item.score}점
+                      {/* Progress Stats */}
+                      <div className="text-right">
+                        <div className="text-amber-300 font-extrabold text-xs sm:text-sm">
+                          암송 {item.completedCount}/36 구절
+                        </div>
+                        <div className="text-[11px] text-slate-400 font-bold mt-0.5">
+                          {item.score}점
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-xs">
+                아직 입장한 학생이 없습니다. 상단 '학생 초대 QR' 버튼으로 QR코드를 보여주고 학생들을 참여시켜보세요!
+              </div>
+            )}
           </div>
         )}
 
         {/* TAB 2: TEACHER ADMIN & CERTIFICATE PRINTING */}
         {activeTab === 'teacher_admin' && (
           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-            <div className="bg-emerald-950/40 border border-emerald-500/30 p-3.5 sm:p-4 rounded-2xl text-xs text-emerald-200">
-              <span className="font-bold block mb-1">🏫 초등부 담당 교사 전용 기능:</span>
-              학생들의 암송 진도 현황을 일괄 확인하고, 36구절 완송 수료증을 직접 출력하여 수여할 수 있습니다.
+            <div className="bg-emerald-950/40 border border-emerald-500/30 p-3.5 sm:p-4 rounded-2xl text-xs text-emerald-200 flex items-center justify-between">
+              <div>
+                <span className="font-bold block mb-1">🏫 초등부 담당 교사 전용 실시간 현황:</span>
+                학생들이 QR로 입장하여 암송을 진행하는 현황을 실시간 확인하고 완송 수료증을 출력할 수 있습니다.
+              </div>
+              {onAddDemoStudent && (
+                <button
+                  onClick={onAddDemoStudent}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shrink-0 cursor-pointer active:scale-95 ml-2"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>테스트 학생 추가</span>
+                </button>
+              )}
             </div>
 
             {/* Roster Table for Teachers */}
-            <div className="space-y-2">
-              {leaderboard.map((student) => {
-                const isFinishedAll = student.completedCount >= 36;
+            {joinedStudents.length > 0 ? (
+              <div className="space-y-2">
+                {joinedStudents.map((student) => {
+                  const isFinishedAll = student.completedCount >= 36;
 
-                return (
-                  <div
-                    key={student.id}
-                    className="flex flex-wrap items-center justify-between gap-3 bg-slate-950 border border-slate-800 p-3.5 rounded-2xl hover:border-emerald-500/40 transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <SpriteCanvas preset={student.avatarConfig} size={32} animated={false} />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-extrabold text-sm text-white">{student.name}</span>
-                          <span className="text-xs text-emerald-400 font-bold bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                            {student.grade}
-                          </span>
-                        </div>
-                        <div className="text-xs text-slate-400 mt-0.5">
-                          진도율: {student.completedCount}/36 구절 ({Math.round((student.completedCount / 36) * 100)}%)
+                  return (
+                    <div
+                      key={student.id}
+                      className="flex flex-wrap items-center justify-between gap-3 bg-slate-950 border border-slate-800 p-3.5 rounded-2xl hover:border-emerald-500/40 transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <SpriteCanvas preset={student.avatarConfig} size={32} animated={false} />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-extrabold text-sm text-white">{student.name}</span>
+                            <span className="text-xs text-emerald-400 font-bold bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                              {student.grade}
+                            </span>
+                          </div>
+                          <div className="text-xs text-slate-400 mt-0.5">
+                            진도율: {student.completedCount}/36 구절 ({Math.round((student.completedCount / 36) * 100)}%)
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedStudentForMatrix(student);
-                          setActiveTab('verse_matrix');
-                        }}
-                        className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-700 transition cursor-pointer active:scale-95"
-                      >
-                        암송표 확인
-                      </button>
-
-                      <button
-                        onClick={() => onOpenCertificate(student.name, student.grade)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition cursor-pointer active:scale-95 ${
-                          isFinishedAll
-                            ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md'
-                            : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                        }`}
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>수료증 출력</span>
-                      </button>
-
-                      {student.id !== player.id && (
+                      <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setStudentToDelete(student)}
-                          className="p-1.5 text-rose-400 hover:bg-rose-500/20 rounded-xl transition cursor-pointer active:scale-95"
-                          title="학생 삭제"
+                          onClick={() => {
+                            setSelectedStudentForMatrix(student);
+                            setActiveTab('verse_matrix');
+                          }}
+                          className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-700 transition cursor-pointer active:scale-95"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          암송표 확인
                         </button>
-                      )}
+
+                        <button
+                          onClick={() => onOpenCertificate(student.name, student.grade)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition cursor-pointer active:scale-95 ${
+                            isFinishedAll
+                              ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md'
+                              : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                          }`}
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>수료증 출력</span>
+                        </button>
+
+                        {onRemoveStudent && student.id !== player.id && (
+                          <button
+                            onClick={() => setStudentToDelete(student)}
+                            className="p-1.5 text-rose-400 hover:bg-rose-500/20 rounded-xl transition cursor-pointer active:scale-95"
+                            title="학생 삭제"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-xs">
+                현재 입장한 학생이 없습니다. 학생용 QR 코드를 보여주고 접속을 안내하세요.
+              </div>
+            )}
           </div>
         )}
 
@@ -443,7 +404,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   취소
                 </button>
                 <button
-                  onClick={() => handleDeleteStudent(studentToDelete.id)}
+                  onClick={() => {
+                    if (onRemoveStudent) onRemoveStudent(studentToDelete.id);
+                    setStudentToDelete(null);
+                  }}
                   className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition cursor-pointer"
                 >
                   삭제 확인

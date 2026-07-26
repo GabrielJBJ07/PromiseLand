@@ -1,28 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { PlayerStats, BibleVerse } from '../types';
+import { PlayerStats, BibleVerse, LeaderboardEntry } from '../types';
 import { BIBLE_VERSES } from '../data/bibleVerses';
 import { drawPixelSprite } from '../utils/spriteGenerator';
 import { SpriteCanvas } from './SpriteCanvas';
-import { CHARACTER_PRESETS } from '../utils/spriteGenerator';
 import promisedLandMapImg from '../assets/images/promised_land_map_1785069145605.jpg';
 import {
   BookOpen,
   Trophy,
   Sparkles,
-  MapPin,
-  ChevronRight,
+  Play,
+  Square,
+  QrCode,
+  Users,
   Compass,
   BarChart2,
   ArrowUp,
   ArrowDown,
   ArrowLeft,
   ArrowRight,
-  Smartphone,
   Flame,
+  Award,
 } from 'lucide-react';
 
 interface MetaverseMapProps {
   player: PlayerStats;
+  joinedStudents: LeaderboardEntry[];
+  gameSessionStatus: 'WAITING' | 'PLAYING' | 'ENDED';
+  onStartGameSession: () => void;
+  onEndGameSession: () => void;
+  onOpenAwardCeremony: () => void;
+  onOpenQRModal: () => void;
   onOpenQuiz: (verse: BibleVerse) => void;
   onOpenDashboard: () => void;
   onOpenAIHelp: () => void;
@@ -33,12 +40,10 @@ interface MapEntity {
   id: string;
   x: number;
   y: number;
-  type: 'verse_gate' | 'fruit' | 'classmate' | 'finish_stage';
+  type: 'verse_gate' | 'fruit' | 'finish_stage';
   verse?: BibleVerse;
   fruitType?: 'lemon' | 'orange' | 'apple';
   collected?: boolean;
-  classmateName?: string;
-  preset?: any;
   label?: string;
   stationNumber?: number;
   zoneName?: string;
@@ -54,6 +59,12 @@ interface LandmarkBanner {
 
 export const MetaverseMap: React.FC<MetaverseMapProps> = ({
   player,
+  joinedStudents,
+  gameSessionStatus,
+  onStartGameSession,
+  onEndGameSession,
+  onOpenAwardCeremony,
+  onOpenQRModal,
   onOpenQuiz,
   onOpenDashboard,
   onOpenAIHelp,
@@ -132,68 +143,50 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
     { name: '도착', sub: 'Arrival', icon: '🚩', x: 2080, y: 550 },
   ];
 
+  // Path Waypoints coordinates for the 36 stations from Start to Finish
+  const pathWaypoints: { x: number; y: number; zone: string }[] = [
+    { x: 160, y: 660, zone: '출발' },
+    { x: 260, y: 630, zone: '광야' },
+    { x: 360, y: 580, zone: '광야' },
+    { x: 460, y: 520, zone: '광야' },
+    { x: 540, y: 470, zone: '홍해' },
+    { x: 620, y: 410, zone: '홍해' },
+    { x: 700, y: 350, zone: '홍해' },
+    { x: 780, y: 290, zone: '홍해' },
+    { x: 860, y: 260, zone: '오아시스' },
+    { x: 940, y: 300, zone: '오아시스' },
+    { x: 1010, y: 350, zone: '오아시스' },
+    { x: 1080, y: 400, zone: '성막' },
+    { x: 1150, y: 440, zone: '성막' },
+    { x: 1200, y: 520, zone: '성막' },
+    { x: 1240, y: 600, zone: '시내산' },
+    { x: 1290, y: 660, zone: '시내산' },
+    { x: 1340, y: 680, zone: '시내산' },
+    { x: 1390, y: 610, zone: '시내산' },
+    { x: 1430, y: 510, zone: '요단강' },
+    { x: 1470, y: 410, zone: '요단강' },
+    { x: 1510, y: 310, zone: '요단강' },
+    { x: 1560, y: 250, zone: '요단강' },
+    { x: 1620, y: 290, zone: '여리고성' },
+    { x: 1680, y: 340, zone: '여리고성' },
+    { x: 1730, y: 390, zone: '여리고성' },
+    { x: 1780, y: 330, zone: '여리고성' },
+    { x: 1830, y: 260, zone: '약속의 땅' },
+    { x: 1880, y: 210, zone: '약속의 땅' },
+    { x: 1930, y: 170, zone: '예루살렘' },
+    { x: 1980, y: 220, zone: '예루살렘' },
+    { x: 2010, y: 300, zone: '약속의 땅' },
+    { x: 2040, y: 390, zone: '도착' },
+    { x: 2060, y: 470, zone: '도착' },
+    { x: 2080, y: 530, zone: '도착' },
+    { x: 2100, y: 590, zone: '도착' },
+    { x: 2120, y: 650, zone: '완성 피니시' },
+  ];
+
   // Generate 36 Mission Activity Pointers along the map journey path
   const [entities, setEntities] = useState<MapEntity[]>(() => {
     const list: MapEntity[] = [];
 
-    // Path coordinates mapping 36 stations from Start to Finish across landmark zones
-    const pathWaypoints: { x: number; y: number; zone: string }[] = [
-      // Zone 1: 광야 (Wilderness) - 1..4
-      { x: 160, y: 660, zone: '출발' },
-      { x: 260, y: 630, zone: '광야' },
-      { x: 360, y: 580, zone: '광야' },
-      { x: 460, y: 520, zone: '광야' },
-
-      // Zone 2: 홍해 (Red Sea) - 5..8
-      { x: 540, y: 470, zone: '홍해' },
-      { x: 620, y: 410, zone: '홍해' },
-      { x: 700, y: 350, zone: '홍해' },
-      { x: 780, y: 290, zone: '홍해' },
-
-      // Zone 3: 오아시스 (Oasis) - 9..12
-      { x: 860, y: 260, zone: '오아시스' },
-      { x: 940, y: 300, zone: '오아시스' },
-      { x: 1010, y: 350, zone: '오아시스' },
-      { x: 1080, y: 400, zone: '성막' },
-
-      // Zone 4: 성막 (Tabernacle) - 13..16
-      { x: 1150, y: 440, zone: '성막' },
-      { x: 1200, y: 520, zone: '성막' },
-      { x: 1240, y: 600, zone: '시내산' },
-      { x: 1290, y: 660, zone: '시내산' },
-
-      // Zone 5: 시내산 (Mount Sinai) - 17..20
-      { x: 1340, y: 680, zone: '시내산' },
-      { x: 1390, y: 610, zone: '시내산' },
-      { x: 1430, y: 510, zone: '요단강' },
-      { x: 1470, y: 410, zone: '요단강' },
-
-      // Zone 6: 요단강 (Jordan River) - 21..24
-      { x: 1510, y: 310, zone: '요단강' },
-      { x: 1560, y: 250, zone: '요단강' },
-      { x: 1620, y: 290, zone: '여리고성' },
-      { x: 1680, y: 340, zone: '여리고성' },
-
-      // Zone 7: 여리고성 (Jericho) - 25..28
-      { x: 1730, y: 390, zone: '여리고성' },
-      { x: 1780, y: 330, zone: '여리고성' },
-      { x: 1830, y: 260, zone: '약속의 땅' },
-      { x: 1880, y: 210, zone: '약속의 땅' },
-
-      // Zone 8: 약속의 땅 (Promised Land / Jerusalem) - 29..32
-      { x: 1930, y: 170, zone: '예루살렘' },
-      { x: 1980, y: 220, zone: '예루살렘' },
-      { x: 2010, y: 300, zone: '약속의 땅' },
-      { x: 2040, y: 390, zone: '도착' },
-
-      // Zone 9: 도착 (Finish) - 33..36
-      { x: 2060, y: 470, zone: '도착' },
-      { x: 2080, y: 530, zone: '도착' },
-      { x: 2100, y: 590, zone: '도착' },
-      { x: 2120, y: 650, zone: '완성 피니시' },
-    ];
-
-    // Assign 36 Bible Verses to path pointers
     BIBLE_VERSES.forEach((verse, idx) => {
       const stationNumber = idx + 1;
       const point = pathWaypoints[idx] || { x: 200 + idx * 50, y: 400, zone: '여정' };
@@ -216,30 +209,15 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       const waypoint = pathWaypoints[(i * 2) % 36];
       list.push({
         id: `fruit_${i}`,
-        x: waypoint.x + (Math.sin(i) * 35),
-        y: waypoint.y + (Math.cos(i) * 35),
+        x: waypoint.x + Math.sin(i) * 35,
+        y: waypoint.y + Math.cos(i) * 35,
         type: 'fruit',
         fruitType: fType,
         collected: false,
       });
     }
 
-    // Simulated Classmates placed near landmark zones
-    const classmateNames = ['박주은 (4학년)', '이하준 (5학년)', '김다은 (6학년)', '최서준 (5학년)', '한예원 (4학년)'];
-    const classmateWaypoints = [pathWaypoints[2], pathWaypoints[8], pathWaypoints[16], pathWaypoints[24], pathWaypoints[30]];
-    classmateNames.forEach((name, idx) => {
-      const wp = classmateWaypoints[idx] || pathWaypoints[idx * 6];
-      list.push({
-        id: `classmate_${idx}`,
-        x: wp.x + 25,
-        y: wp.y - 25,
-        type: 'classmate',
-        classmateName: name,
-        preset: CHARACTER_PRESETS[(idx + 1) % CHARACTER_PRESETS.length],
-      });
-    });
-
-    // Finish Stage Monument at X: 2120
+    // Finish Stage Monument
     list.push({
       id: 'finish_monument',
       x: 2120,
@@ -276,7 +254,7 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
     };
   }, []);
 
-  // Animation & Movement Loop (supports keyboard + mobile touch controls)
+  // Animation & Movement Loop
   useEffect(() => {
     let animationFrameId: number;
 
@@ -284,7 +262,6 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       let dx = 0;
       let dy = 0;
 
-      // Keyboard or Virtual Touch D-Pad Input
       if (
         keysPressed.current['ArrowLeft'] ||
         keysPressed.current['a'] ||
@@ -323,13 +300,16 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       }
 
       if (dx !== 0 || dy !== 0) {
-        setWalkFrame((prev) => (prev + 0.25) % 4);
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const normX = (dx / length) * moveSpeed;
+        const normY = (dy / length) * moveSpeed;
 
-        setPlayerPos((prev) => {
-          const newX = Math.max(50, Math.min(MAP_WIDTH - 50, prev.x + dx * moveSpeed));
-          const newY = Math.max(80, Math.min(MAP_HEIGHT - 80, prev.y + dy * moveSpeed));
-          return { x: newX, y: newY };
-        });
+        setPlayerPos((prev) => ({
+          x: Math.max(40, Math.min(MAP_WIDTH - 40, prev.x + normX)),
+          y: Math.max(40, Math.min(MAP_HEIGHT - 40, prev.y + normY)),
+        }));
+
+        setWalkFrame((prev) => (prev + 1) % 4);
       }
 
       animationFrameId = requestAnimationFrame(gameLoop);
@@ -339,20 +319,18 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
     return () => cancelAnimationFrame(animationFrameId);
   }, [moveSpeed]);
 
-  // Check Proximity to Gates & Fruit Collectibles
+  // Check Proximity to Verses and Fruits
   useEffect(() => {
     let nearestGate: BibleVerse | null = null;
-    let minDist = 75;
+    let minDist = 45;
 
     entities.forEach((entity) => {
-      const dist = Math.hypot(playerPos.x - entity.x, playerPos.y - entity.y);
+      const dist = Math.hypot(entity.x - playerPos.x, entity.y - playerPos.y);
 
-      // Verse Gate proximity
       if (entity.type === 'verse_gate' && entity.verse && dist < minDist) {
         nearestGate = entity.verse;
       }
 
-      // Fruit collection proximity
       if (entity.type === 'fruit' && !entity.collected && dist < 38) {
         setEntities((prev) =>
           prev.map((e) => (e.id === entity.id ? { ...e, collected: true } : e))
@@ -364,7 +342,7 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
     setActiveGate(nearestGate);
   }, [playerPos, entities]);
 
-  // Canvas Render Loop with High-DPI Pixel Ratio for Mobile Phone / Tablet Sharpness
+  // Canvas Render Loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -375,11 +353,9 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
     const width = screenSize.width;
     const height = screenSize.height;
 
-    // Set canvas buffer resolution according to devicePixelRatio
     canvas.width = width * dpr;
     canvas.height = height * dpr;
 
-    // Scale canvas context for sharp rendering on Mobile Retina / AMOLED screens
     ctx.scale(dpr, dpr);
     ctx.imageSmoothingEnabled = false;
 
@@ -392,7 +368,7 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
     ctx.save();
     ctx.translate(-cameraX, -cameraY);
 
-    // 1. Draw Map Image '약속의 땅.png' as full background
+    // 1. Draw Map Image
     if (mapImageRef.current && mapLoaded) {
       ctx.drawImage(mapImageRef.current, 0, 0, MAP_WIDTH, MAP_HEIGHT);
     } else {
@@ -400,10 +376,9 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       ctx.fillRect(0, 0, MAP_WIDTH, MAP_HEIGHT);
     }
 
-    // 2. Draw Connected Winding Mission Path Line
+    // 2. Draw Mission Path Line
     const gateEntities = entities.filter((e) => e.type === 'verse_gate');
     if (gateEntities.length > 1) {
-      // Outer Glow Line
       ctx.beginPath();
       ctx.setLineDash([10, 6]);
       ctx.lineWidth = 6;
@@ -414,7 +389,6 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       });
       ctx.stroke();
 
-      // Inner Bright Line
       ctx.beginPath();
       ctx.setLineDash([8, 6]);
       ctx.lineWidth = 3.5;
@@ -424,10 +398,10 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
         else ctx.lineTo(g.x, g.y);
       });
       ctx.stroke();
-      ctx.setLineDash([]); // Reset dash
+      ctx.setLineDash([]);
     }
 
-    // 3. Draw Landmark Labels on the Map
+    // 3. Draw Landmark Labels
     LANDMARKS.forEach((lm) => {
       ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
       ctx.beginPath();
@@ -455,7 +429,6 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
         !isCompleted &&
         (entity.stationNumber === 1 || player.completedVerseIds.includes(entity.verse.id - 1));
 
-      // Pointer Outer Pulsing Aura for active/next available mission
       if (isNextAvailable) {
         const pulseSize = 28 + Math.sin(Date.now() / 200) * 4;
         ctx.fillStyle = 'rgba(234, 179, 8, 0.4)';
@@ -464,24 +437,20 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
         ctx.fill();
       }
 
-      // Pointer Node Circle
       ctx.fillStyle = isCompleted ? '#16A34A' : isNextAvailable ? '#EAB308' : '#334155';
       ctx.beginPath();
       ctx.arc(entity.x, entity.y, 18, 0, Math.PI * 2);
       ctx.fill();
 
-      // Border Ring
       ctx.strokeStyle = isCompleted ? '#86EFAC' : isNextAvailable ? '#FFFFFF' : '#64748B';
       ctx.lineWidth = isNextAvailable ? 3 : 2;
       ctx.stroke();
 
-      // Icon inside pointer
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'black 11px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(isCompleted ? '✓' : `${entity.stationNumber}`, entity.x, entity.y + 4);
 
-      // Station Badge Tag above pointer
       const badgeText = `미션 #${entity.stationNumber}`;
       ctx.fillStyle = isCompleted
         ? 'rgba(22, 101, 52, 0.95)'
@@ -498,32 +467,14 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       ctx.fillText(badgeText, entity.x, entity.y - 24);
     });
 
-    // 5. Draw Collectible Fruits & Classmates
+    // 5. Draw Collectible Fruits
     entities.forEach((entity) => {
       if (entity.type === 'fruit' && !entity.collected) {
         ctx.font = '16px sans-serif';
         ctx.textAlign = 'center';
         const fruitEmoji = entity.fruitType === 'lemon' ? '🍋' : entity.fruitType === 'orange' ? '🍊' : '🍎';
         ctx.fillText(fruitEmoji, entity.x, entity.y);
-      } else if (entity.type === 'classmate') {
-        drawPixelSprite(
-          ctx,
-          entity.preset,
-          entity.x - 14,
-          entity.y - 14,
-          28,
-          'down',
-          0,
-          false
-        );
-        ctx.fillStyle = 'rgba(15,23,42,0.85)';
-        ctx.fillRect(entity.x - 35, entity.y - 28, 70, 12);
-        ctx.fillStyle = '#6EE7B7';
-        ctx.font = '9px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(entity.classmateName || '', entity.x, entity.y - 19);
       } else if (entity.type === 'finish_stage') {
-        // Finish Flag
         ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
         ctx.beginPath();
         ctx.roundRect(entity.x - 50, entity.y - 30, 100, 26, 8);
@@ -539,7 +490,67 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       }
     });
 
-    // 6. Draw Player Character Avatar
+    // 6. Draw Joined Real-time Students on Map
+    joinedStudents.forEach((student, sIdx) => {
+      if (student.id === player.id) return; // Drawn separately as active player
+
+      // Position along pathWaypoints based on completedCount
+      const stationIdx = Math.min(35, Math.max(0, student.completedCount));
+      const targetWp = pathWaypoints[stationIdx] || pathWaypoints[0];
+
+      // Offset slightly per student so they don't overlap completely
+      const offsetX = (sIdx % 3) * 18 - 18;
+      const offsetY = Math.floor(sIdx / 3) * 16 - 8;
+      const studentX = targetWp.x + offsetX;
+      const studentY = targetWp.y + offsetY;
+
+      // Draw Student Sprite
+      drawPixelSprite(
+        ctx,
+        student.avatarConfig,
+        studentX - 16,
+        studentY - 16,
+        32,
+        'down',
+        0,
+        false
+      );
+
+      // Student Name & Status Tag Bubble
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.beginPath();
+      ctx.roundRect(studentX - 40, studentY - 32, 80, 14, 4);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(52, 211, 153, 0.6)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = '#6EE7B7';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(student.name, studentX, studentY - 22);
+
+      // Waiting vs Playing Speech Bubble
+      if (gameSessionStatus === 'WAITING') {
+        ctx.fillStyle = 'rgba(234, 179, 8, 0.95)';
+        ctx.beginPath();
+        ctx.roundRect(studentX - 30, studentY - 48, 60, 13, 4);
+        ctx.fill();
+        ctx.fillStyle = '#0F172A';
+        ctx.font = 'extrabold 8px sans-serif';
+        ctx.fillText('⏳ 대기 중', studentX, studentY - 38);
+      } else if (gameSessionStatus === 'PLAYING') {
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.95)';
+        ctx.beginPath();
+        ctx.roundRect(studentX - 35, studentY - 48, 70, 13, 4);
+        ctx.fill();
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'extrabold 8px sans-serif';
+        ctx.fillText(`📖 #${student.completedCount + 1}구절`, studentX, studentY - 38);
+      }
+    });
+
+    // 7. Draw Player Character Avatar
     const hasAura = player.equippedItems.includes('helmet_salvation');
     drawPixelSprite(
       ctx,
@@ -548,216 +559,181 @@ export const MetaverseMap: React.FC<MetaverseMapProps> = ({
       playerPos.y - 20,
       40,
       direction,
-      Math.floor(walkFrame),
+      walkFrame,
       hasAura
     );
 
-    // Player Name Tag
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+    // Player Name Tag & Indicator Ring
+    ctx.fillStyle = 'rgba(245, 158, 11, 0.95)';
     ctx.beginPath();
-    ctx.roundRect(playerPos.x - 45, playerPos.y - 40, 90, 16, 6);
+    ctx.arc(playerPos.x, playerPos.y + 18, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+    ctx.beginPath();
+    ctx.roundRect(playerPos.x - 45, playerPos.y - 36, 90, 16, 6);
     ctx.fill();
     ctx.strokeStyle = '#F59E0B';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    ctx.fillStyle = '#FDE047';
-    ctx.font = 'bold 10px sans-serif';
+    ctx.fillStyle = '#FEF08A';
+    ctx.font = 'extrabold 10px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`${player.name} (${player.grade})`, playerPos.x, playerPos.y - 28);
+    ctx.fillText(`${player.name} (나)`, playerPos.x, playerPos.y - 24);
 
     ctx.restore();
-  }, [playerPos, direction, walkFrame, entities, player, mapLoaded, screenSize]);
-
-  // Handle Touch/Click on Canvas to move player or trigger mission pointer directly
-  const handleMapTouchOrClick = (clientX: number, clientY: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const cameraX = Math.max(0, Math.min(MAP_WIDTH - screenSize.width, playerPos.x - screenSize.width / 2));
-    const cameraY = Math.max(0, Math.min(MAP_HEIGHT - screenSize.height, playerPos.y - screenSize.height / 2));
-
-    const clickX = clientX - rect.left + cameraX;
-    const clickY = clientY - rect.top + cameraY;
-
-    // Check if clicked directly on or near a mission pointer
-    const clickedGate = entities.find((entity) => {
-      if (entity.type !== 'verse_gate') return false;
-      const dist = Math.hypot(clickX - entity.x, clickY - entity.y);
-      return dist < 36;
-    });
-
-    if (clickedGate && clickedGate.verse) {
-      setPlayerPos({ x: clickedGate.x, y: clickedGate.y });
-      onOpenQuiz(clickedGate.verse);
-    } else {
-      setPlayerPos({ x: clickX, y: clickY });
-    }
-  };
-
-  // Virtual Touch Controller Event Helpers
-  const handleTouchDirStart = (dir: 'up' | 'down' | 'left' | 'right') => {
-    touchDirections.current[dir] = true;
-  };
-  const handleTouchDirEnd = (dir: 'up' | 'down' | 'left' | 'right') => {
-    touchDirections.current[dir] = false;
-  };
+  }, [playerPos, direction, walkFrame, mapLoaded, entities, player, joinedStudents, gameSessionStatus, screenSize]);
 
   return (
-    <div className="relative w-full h-screen bg-slate-950 overflow-hidden flex flex-col justify-between select-none touch-none">
-      {/* Responsive Mobile/Tablet Top HUD Bar */}
-      <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-4 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        {/* Player Profile & Score Badge */}
-        <div className="flex items-center gap-2 sm:gap-3 bg-slate-900/90 border border-amber-500/40 p-2 px-3 sm:p-2.5 sm:px-4 rounded-2xl shadow-xl backdrop-blur-md pointer-events-auto shrink-0">
-          <SpriteCanvas preset={player.character} size={32} animated={false} />
+    <div className="relative w-full h-screen overflow-hidden bg-slate-950 select-none touch-none">
+      {/* 2D Canvas Viewport */}
+      <canvas ref={canvasRef} className="block w-full h-full cursor-grab active:cursor-grabbing" />
+
+      {/* TEACHER TOP CONTROL BAR (교사 제어 및 학생 모니터링 바) */}
+      <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-4 sm:right-4 z-30 flex flex-wrap items-center justify-between gap-2 bg-slate-900/90 border border-amber-500/40 rounded-2xl p-2.5 sm:p-3 shadow-2xl backdrop-blur-md">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="bg-amber-500/20 text-amber-400 p-2 rounded-xl border border-amber-500/30">
+            <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
+          </div>
+
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-amber-300 text-xs sm:text-sm">{player.name}</span>
-              <span className="bg-amber-500/20 text-amber-400 text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-amber-500/30">
-                {player.grade}
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-xs sm:text-sm text-amber-300">
+                2026 초등부 '약속의 땅' 교사 모니터링
+              </span>
+              <span
+                className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                  gameSessionStatus === 'WAITING'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
+                    : gameSessionStatus === 'PLAYING'
+                    ? 'bg-emerald-500 text-slate-950'
+                    : 'bg-purple-600 text-white'
+                }`}
+              >
+                {gameSessionStatus === 'WAITING'
+                  ? '⏳ 대기 중 (QR 스캔 대기)'
+                  : gameSessionStatus === 'PLAYING'
+                  ? '🟢 게임 진행 중'
+                  : '🏆 게임 종료됨'}
               </span>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-slate-300 mt-0.5">
-              <span className="flex items-center gap-0.5 text-emerald-400 font-bold">
-                <BookOpen className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> {player.completedVerseIds.length}/36
-              </span>
-              <span className="flex items-center gap-0.5 text-amber-400 font-bold">
-                <Trophy className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> {player.score}점
-              </span>
-              <span className="text-amber-300">🍋 x{collectedFruits}</span>
-            </div>
+
+            <p className="text-[10px] text-slate-300 hidden md:block mt-0.5">
+              QR 코드로 학생들을 초대하고 실시간 이동과 말씀 암송 미션 진도를 관찰하세요!
+            </p>
           </div>
         </div>
 
-        {/* Action Controls for Mobile Phone & Tablet */}
-        <div className="flex items-center gap-1.5 sm:gap-2 pointer-events-auto flex-wrap">
+        {/* Teacher Game Session Controls */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Invite Students QR */}
           <button
-            onClick={onOpenItemInventory}
-            className="flex items-center gap-1 bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-amber-300 font-bold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-[11px] sm:text-xs transition shadow-lg cursor-pointer active:scale-95"
+            onClick={onOpenQRModal}
+            className="flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs shadow-md transition cursor-pointer active:scale-95"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">보물/장비</span>
-            <span className="sm:hidden">장비</span> ({player.equippedItems.length})
+            <QrCode className="w-3.5 h-3.5" />
+            <span>QR 초대</span>
           </button>
 
-          <button
-            onClick={onOpenAIHelp}
-            className="flex items-center gap-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-white font-bold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-[11px] sm:text-xs transition shadow-lg cursor-pointer active:scale-95"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>AI 튜터</span>
-          </button>
+          {/* Joined Count */}
+          <div className="bg-slate-950 border border-slate-800 text-slate-300 px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5">
+            <Users className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{joinedStudents.length}명</span>
+          </div>
 
+          {/* Start Button */}
+          {gameSessionStatus === 'WAITING' && (
+            <button
+              onClick={onStartGameSession}
+              className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs shadow-lg transition cursor-pointer active:scale-95 animate-bounce"
+            >
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span>게임 시작</span>
+            </button>
+          )}
+
+          {/* End Button */}
+          {gameSessionStatus === 'PLAYING' && (
+            <button
+              onClick={onEndGameSession}
+              className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs shadow-lg transition cursor-pointer active:scale-95"
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+              <span>게임 종료</span>
+            </button>
+          )}
+
+          {/* Award Ceremony Button */}
+          {gameSessionStatus === 'ENDED' && (
+            <button
+              onClick={onOpenAwardCeremony}
+              className="flex items-center gap-1.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs shadow-lg transition cursor-pointer active:scale-95"
+            >
+              <Award className="w-3.5 h-3.5" />
+              <span>시상식 보기</span>
+            </button>
+          )}
+
+          {/* Dashboard Button */}
           <button
             onClick={onOpenDashboard}
-            className="flex items-center gap-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[11px] sm:text-xs transition shadow-lg cursor-pointer active:scale-95"
+            className="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-xl border border-slate-700 transition cursor-pointer active:scale-95 shrink-0"
+            title="실시간 현황 대시보드"
           >
-            <BarChart2 className="w-3.5 h-3.5" />
-            <span>대시보드</span>
+            <BarChart2 className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Main Canvas Area */}
-      <div className="relative w-full h-full flex-1">
-        <canvas
-          ref={canvasRef}
-          onClick={(e) => handleMapTouchOrClick(e.clientX, e.clientY)}
-          onTouchStart={(e) => {
-            if (e.touches.length > 0) {
-              handleMapTouchOrClick(e.touches[0].clientX, e.touches[0].clientY);
-            }
-          }}
-          className="w-full h-full cursor-crosshair block touch-none"
-        />
-
-        {/* Interactive Prompt Banner when near a verse gate */}
-        {activeGate && (
-          <div className="absolute bottom-24 sm:bottom-20 left-1/2 transform -translate-x-1/2 z-30 animate-bounce max-w-[90vw]">
-            <button
-              onClick={() => onOpenQuiz(activeGate!)}
-              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-4 py-3 sm:px-6 sm:py-3.5 rounded-2xl shadow-2xl flex items-center gap-2 sm:gap-3 border-2 border-white text-xs sm:text-base cursor-pointer active:scale-95"
-            >
-              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-              <span className="truncate">
-                [{activeGate.reference}] 미션 도전! (터치)
-              </span>
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-            </button>
+      {/* Waiting Lobby Overlay Alert when Waiting */}
+      {gameSessionStatus === 'WAITING' && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-3 sm:p-4 text-center max-w-sm w-11/12 shadow-2xl backdrop-blur-md">
+          <div className="inline-flex items-center gap-1.5 text-amber-400 text-xs font-extrabold mb-1">
+            <Sparkles className="w-4 h-4" /> 교사 게임 시작 대기 중 <Sparkles className="w-4 h-4" />
           </div>
-        )}
-      </div>
-
-      {/* MOBILE TOUCH CONTROLS (Virtual D-Pad on Mobile & Tablet PCs) */}
-      <div className="absolute bottom-4 left-4 z-30 flex items-center pointer-events-auto">
-        {/* Touch Cross D-Pad */}
-        <div className="relative w-32 h-32 bg-slate-900/80 border-2 border-amber-500/40 rounded-full p-2 backdrop-blur-md shadow-2xl flex items-center justify-center">
-          <button
-            onMouseDown={() => handleTouchDirStart('up')}
-            onMouseUp={() => handleTouchDirEnd('up')}
-            onTouchStart={() => handleTouchDirStart('up')}
-            onTouchEnd={() => handleTouchDirEnd('up')}
-            className="absolute top-1 w-10 h-10 bg-slate-800 active:bg-amber-500 text-slate-200 active:text-slate-950 rounded-xl flex items-center justify-center border border-slate-700 active:scale-95 transition"
-            aria-label="Move Up"
-          >
-            <ArrowUp className="w-5 h-5" />
-          </button>
-
-          <button
-            onMouseDown={() => handleTouchDirStart('down')}
-            onMouseUp={() => handleTouchDirEnd('down')}
-            onTouchStart={() => handleTouchDirStart('down')}
-            onTouchEnd={() => handleTouchDirEnd('down')}
-            className="absolute bottom-1 w-10 h-10 bg-slate-800 active:bg-amber-500 text-slate-200 active:text-slate-950 rounded-xl flex items-center justify-center border border-slate-700 active:scale-95 transition"
-            aria-label="Move Down"
-          >
-            <ArrowDown className="w-5 h-5" />
-          </button>
-
-          <button
-            onMouseDown={() => handleTouchDirStart('left')}
-            onMouseUp={() => handleTouchDirEnd('left')}
-            onTouchStart={() => handleTouchDirStart('left')}
-            onTouchEnd={() => handleTouchDirEnd('left')}
-            className="absolute left-1 w-10 h-10 bg-slate-800 active:bg-amber-500 text-slate-200 active:text-slate-950 rounded-xl flex items-center justify-center border border-slate-700 active:scale-95 transition"
-            aria-label="Move Left"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-
-          <button
-            onMouseDown={() => handleTouchDirStart('right')}
-            onMouseUp={() => handleTouchDirEnd('right')}
-            onTouchStart={() => handleTouchDirStart('right')}
-            onTouchEnd={() => handleTouchDirEnd('right')}
-            className="absolute right-1 w-10 h-10 bg-slate-800 active:bg-amber-500 text-slate-200 active:text-slate-950 rounded-xl flex items-center justify-center border border-slate-700 active:scale-95 transition"
-            aria-label="Move Right"
-          >
-            <ArrowRight className="w-5 h-5" />
-          </button>
-
-          {/* Center Touch Indicator */}
-          <div className="w-5 h-5 bg-amber-500/50 rounded-full border border-amber-400/80" />
+          <p className="text-[11px] sm:text-xs text-slate-300">
+            학생들은 QR코드를 스캔하여 게임에 접속해주세요. 교사가 상단 <strong className="text-emerald-400">‘게임 시작’</strong> 버튼을 누르면 시작됩니다.
+          </p>
         </div>
-      </div>
+      )}
 
-      {/* Bottom Right Mobile Journey Progress Badge */}
-      <div className="absolute bottom-4 right-4 z-20 pointer-events-auto">
-        <div className="bg-slate-900/90 border border-amber-500/30 p-2 px-3 sm:p-2.5 sm:px-4 rounded-2xl shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3">
-          <div className="text-[10px] sm:text-xs font-bold text-amber-300 flex items-center gap-1">
-            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">여정 달성률</span>
+      {/* Active Gate Quick Interaction Bar */}
+      {activeGate && gameSessionStatus !== 'ENDED' && (
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 bg-slate-900/95 border-2 border-amber-500/60 rounded-2xl p-3 sm:p-4 max-w-sm w-11/12 shadow-2xl backdrop-blur-md text-white flex items-center justify-between gap-3 animate-bounce">
+          <div className="min-w-0">
+            <span className="text-[10px] text-amber-400 font-extrabold uppercase tracking-wide block">
+              미션 #{activeGate.id} 구절 포착!
+            </span>
+            <p className="text-xs font-bold text-amber-200 truncate">[{activeGate.reference}]</p>
           </div>
-          <div className="w-20 sm:w-32 bg-slate-950 h-2.5 sm:h-3 rounded-full overflow-hidden border border-slate-800">
-            <div
-              className="bg-gradient-to-r from-emerald-400 to-amber-400 h-full transition-all duration-500"
-              style={{ width: `${Math.round((player.completedVerseIds.length / 36) * 100)}%` }}
-            />
-          </div>
-          <span className="text-[11px] sm:text-xs font-extrabold text-amber-400">
-            {Math.round((player.completedVerseIds.length / 36) * 100)}%
-          </span>
+          <button
+            onClick={() => onOpenQuiz(activeGate!)}
+            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-lg transition shrink-0 cursor-pointer active:scale-95 flex items-center gap-1.5 min-h-[40px]"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>암송 퀴즈 풀기</span>
+          </button>
         </div>
+      )}
+
+      {/* Bottom Floating Quick Actions Bar */}
+      <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-30 flex items-center gap-2">
+        <button
+          onClick={onOpenItemInventory}
+          className="bg-slate-900/90 border border-slate-700 hover:border-amber-400 text-amber-300 font-bold px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-xl transition cursor-pointer active:scale-95"
+        >
+          <Flame className="w-4 h-4 text-amber-400" />
+          <span className="hidden sm:inline">전신갑주</span>
+        </button>
+
+        <button
+          onClick={onOpenAIHelp}
+          className="bg-purple-600 hover:bg-purple-500 text-white font-extrabold px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5 shadow-xl transition cursor-pointer active:scale-95"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>AI 튜터</span>
+        </button>
       </div>
     </div>
   );
